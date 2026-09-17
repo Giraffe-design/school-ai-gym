@@ -19,24 +19,31 @@ main{max-width:1120px;margin:auto;padding:24px}
 .n{font-weight:800;color:#8992a2}.emoji{font-size:45px;margin:20px 0 10px}.card h3{font-size:21px;margin:0 0 9px}.card p{color:#687386;line-height:1.5;margin:0}
 .panel{background:#fff;border-radius:20px;padding:20px;margin-bottom:15px;box-shadow:0 7px 25px #17203312}
 button{border:0;border-radius:12px;padding:12px 17px;background:#172033;color:#fff;font-weight:800;cursor:pointer;margin:4px}
-button.light{background:#e9edf4;color:#172033}button:disabled{opacity:.45;cursor:not-allowed}
+button.light{background:#e9edf4;color:#172033}
 .hidden{display:none!important}
 .station-layout{display:grid;grid-template-columns:minmax(0,2fr) minmax(260px,1fr);gap:16px}
 .video-wrap{position:relative;background:#101722;border-radius:18px;overflow:hidden;min-height:300px}
 video{width:100%;display:block;max-height:520px;object-fit:cover;transform:scaleX(-1)}
-.overlay{position:absolute;inset:0;pointer-events:none}
+.overlay{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 .guide{background:#f0f4f9;border-radius:16px;padding:17px}
 .guide h3{margin:0 0 12px}.guide-row{display:flex;gap:10px;align-items:flex-start;margin:10px 0;line-height:1.45}
 .badge{min-width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:#172033;color:#fff;font-weight:800}
 .live{margin-top:12px;border-radius:14px;padding:13px;background:#eef3f8;font-weight:800}
 .live.good{background:#e8f5ed}.live.warn{background:#fff4dd}
 .stat{display:flex;gap:10px;flex-wrap:wrap;margin-top:13px}.statbox{background:#f0f3f8;border-radius:13px;padding:11px 15px;min-width:120px}.num{font-size:32px;font-weight:900}
-.result{font-size:18px;line-height:1.7}.final{text-align:center;padding:30px}.medal{font-size:65px}
 .motion-game{position:relative;background:#dfeef8;border-radius:18px;overflow:hidden;min-height:420px}
-.motion-game canvas{width:100%;height:auto;display:block}.target{position:absolute;border-radius:50%;border:5px solid #fff;box-shadow:0 5px 18px #0002;display:none}
+.target{position:absolute;border-radius:50%;border:5px solid #fff;box-shadow:0 5px 18px #0002;display:none;pointer-events:none}
 .target.red{background:#ef536d}.target.purple{background:#7b61ff}
 .target span{font-size:28px;position:absolute;inset:0;display:grid;place-items:center}
-.hint{font-size:14px;color:#657186;margin-top:8px}
+.targetLabel{position:absolute;top:12px;left:12px;background:#172033dd;color:#fff;border-radius:10px;padding:8px 11px;font-weight:800;z-index:3}
+.result{font-size:18px;line-height:1.7;text-align:center;padding:30px 10px}
+.resultScore{font-size:72px;font-weight:900;margin:8px 0}
+.resultIcon{font-size:60px}
+.resultActions{margin-top:18px}
+.tip{background:#fff8e5;border-radius:13px;padding:12px;margin-top:12px}
+.cloudArea{position:relative;background:#dfeef8;border-radius:18px;min-height:300px;overflow:hidden}
+#clouds{position:absolute;inset:0}.cloud{position:absolute;font-size:42px}
+#player{position:absolute;left:50%;transform:translateX(-50%);font-size:54px;transition:.15s}
 @media(max-width:850px){.grid{grid-template-columns:repeat(2,1fr)}.station-layout{grid-template-columns:1fr}}
 @media(max-width:600px){main{padding:12px}.grid{grid-template-columns:1fr}.hero h2{font-size:27px}.bigscore{font-size:55px}.motion-game{min-height:340px}}
 </style>
@@ -46,7 +53,6 @@ video{width:100%;display:block;max-height:520px;object-fit:cover;transform:scale
 <div><h1>🏃 우리 학교 AI 체육관</h1><div class="sub">5 STATION · 체육수업 모션 챌린지</div></div>
 <div class="scoreTop">오늘 <span id="topScore">0</span>점</div>
 </header>
-
 <main>
 <section id="home">
 <div class="hero">
@@ -58,39 +64,54 @@ video{width:100%;display:block;max-height:520px;object-fit:cover;transform:scale
 </div>
 <div class="grid">
 <div class="card" data-station="1"><div class="n">STATION 1</div><div class="emoji">🏋️</div><h3>스쿼트 챌린지</h3><p>무릎 각도와 몸의 움직임을 AI가 확인해 스쿼트 횟수를 세어줍니다.</p></div>
-<div class="card" data-station="2"><div class="n">STATION 2</div><div class="emoji">⚡</div><h3>움직임 반응 레이스</h3><p>화면의 목표 위치로 손을 움직여 빠르게 터치하세요.</p></div>
-<div class="card" data-station="3"><div class="n">STATION 3</div><div class="emoji">☁️</div><h3>구름 계단 점프</h3><p>몸을 움직여 실제로 점프해야 구름 계단이 올라갑니다.</p></div>
-<div class="card" data-station="4"><div class="n">STATION 4</div><div class="emoji">🦟</div><h3>모기 잡기</h3><p>손을 움직여 화면 속 모기를 직접 잡아보세요. 클릭은 사용하지 않습니다.</p></div>
-<div class="card" data-station="5"><div class="n">STATION 5</div><div class="emoji">🧍</div><h3>AI 자세 체크</h3><p>몸을 기준선에 맞추고 유지하며 어깨·골반 정렬을 확인합니다.</p></div>
+<div class="card" data-station="2"><div class="n">STATION 2</div><div class="emoji">⚡</div><h3>반응속도 레이스</h3><p>화면의 목표까지 몸을 직접 움직여 빠르게 반응하세요.</p></div>
+<div class="card" data-station="3"><div class="n">STATION 3</div><div class="emoji">☁️</div><h3>구름 계단 점프</h3><p>실제로 점프하면 AI가 움직임을 인식해 구름 계단을 올립니다.</p></div>
+<div class="card" data-station="4"><div class="n">STATION 4</div><div class="emoji">🦟</div><h3>모기 잡기</h3><p>마우스 클릭 없이 손을 움직여 화면 속 모기를 잡습니다.</p></div>
+<div class="card" data-station="5"><div class="n">STATION 5</div><div class="emoji">🧍</div><h3>AI 자세 체크</h3><p>어깨와 골반을 기준선에 맞추고 유지합니다.</p></div>
 </div>
 <div class="panel" style="margin-top:17px"><h2>📊 나의 기록</h2><div id="records"></div></div>
 <div class="panel"><button id="resetBtn">오늘 기록 초기화</button></div>
 </section>
 
 <section id="station" class="hidden">
-<div class="panel"><button class="light" id="homeBtn">← 스테이션 목록</button><span id="title"></span></div>
+<div class="panel">
+<button class="light" id="homeBtn">← 스테이션 목록</button>
+<span id="title"></span>
+</div>
 <div id="stationBody"></div>
 </section>
 </main>
 
 <script>
 const state=JSON.parse(localStorage.getItem("gym5")||"{}");
-let stream=null,pose=null,raf=null,timer=null;
-let count=0,phase="up",lastHipY=null,gameScore=0,active=false,mode=null,targetEl=null,targetBorn=0;
-const names={squat:"스쿼트",reaction:"움직임 반응",jump:"점프",hand:"모기 잡기",posture:"자세 체크"};
+let stream=null,pose=null,raf=null,timer=null,active=false;
+let count=0,phase="up",lastHipY=null,gameScore=0,mode=null,targetEl=null;
+const names={squat:"스쿼트",reaction:"반응속도",jump:"점프",hand:"모기 잡기",posture:"자세 체크"};
 
 function $(id){return document.getElementById(id)}
 function save(){localStorage.setItem("gym5",JSON.stringify(state));render()}
-function calc(){let s=Math.min(100,(state.squat||0)*3),r=Math.min(100,(state.reaction||0)*4),j=Math.min(100,(state.jump||0)*2),h=Math.min(100,(state.hand||0)*3),p=state.posture||0;return Math.round((s+r+j+h+p)/5)}
+function calc(){
+ let s=Math.min(100,(state.squat||0)*3),r=Math.min(100,(state.reaction||0)*4),
+ j=Math.min(100,(state.jump||0)*2),h=Math.min(100,(state.hand||0)*3),p=state.posture||0;
+ return Math.round((s+r+j+h+p)/5)
+}
 function render(){
  const score=calc(),done=Object.keys(names).filter(k=>typeof state[k]==="number").length;
  $("dailyScore").textContent=score;$("topScore").textContent=score;
  $("scoreText").textContent=done===5?"🎉 5개 스테이션 완료! 오늘의 체육 챌린지 성공!":`${done}/5 스테이션 완료 · 다음 스테이션에 도전하세요!`;
- $("progress").innerHTML=Object.keys(names).map(k=>`<div class="dot ${typeof state[k]==="number"?"done":""}"></div>`).join("");
- $("records").innerHTML=Object.keys(names).map((k,i)=>`<div class="mini" style="display:inline-block;margin:4px;background:#f0f3f8;border-radius:13px;padding:10px 14px">${i+1}. ${names[k]} <b style="font-size:21px">${state[k]??"-"}</b></div>`).join("");
+ $("progress").innerHTML=Object.keys(names).map(k=>`<div class="dot ${typeof state[k]==="number"?"done":""}></div>`).join("");
+ $("records").innerHTML=Object.keys(names).map((k,i)=>`<div style="display:inline-block;margin:4px;background:#f0f3f8;border-radius:13px;padding:10px 14px">${i+1}. ${names[k]} <b style="font-size:21px">${state[k]??"-"}</b></div>`).join("");
 }
-async function loadScript(src){return new Promise((resolve,reject)=>{if(document.querySelector(`script[src="${src}"]`)){resolve();return}const s=document.createElement("script");s.src=src;s.onload=resolve;s.onerror=reject;document.head.appendChild(s)})}
-function stopAll(){active=false;clearInterval(timer);timer=null;if(raf)cancelAnimationFrame(raf);raf=null;if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}pose=null}
+async function loadScript(src){return new Promise((resolve,reject)=>{
+ if(document.querySelector(`script[src="${src}"]`)){resolve();return}
+ const s=document.createElement("script");s.src=src;s.onload=resolve;s.onerror=reject;document.head.appendChild(s)
+})}
+function stopAll(){
+ active=false;clearInterval(timer);timer=null;
+ if(raf)cancelAnimationFrame(raf);raf=null;
+ if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}
+ pose=null
+}
 async function startPoseCamera(video,drawMode){
  try{
   await loadScript("https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js");
@@ -98,59 +119,90 @@ async function startPoseCamera(video,drawMode){
   video.srcObject=stream;await video.play();
   pose=new Pose({locateFile:f=>`https://cdn.jsdelivr.net/npm/@mediapipe/pose/${f}`});
   pose.setOptions({modelComplexity:1,smoothLandmarks:true,minDetectionConfidence:.55,minTrackingConfidence:.55});
-  pose.onResults(r=>{if(drawMode==="squat")handleSquat(r);if(drawMode==="jump")handleJump(r);if(drawMode==="reaction"||drawMode==="bug")handleReach(r);if(drawMode==="posture")handlePosture(r)});
-  const send=async()=>{if(!active||!pose)return;try{await pose.send({image:video})}catch(e){}raf=requestAnimationFrame(send)};active=true;send();
- }catch(e){const msg=$("liveMsg");if(msg){msg.className="live warn";msg.textContent="카메라를 사용할 수 없습니다. 브라우저의 카메라 권한을 허용해 주세요."}}
+  pose.onResults(r=>{
+   if(drawMode==="squat")handleSquat(r);
+   if(drawMode==="jump")handleJump(r);
+   if(drawMode==="reaction"||drawMode==="bug")handleReach(r);
+   if(drawMode==="posture")handlePosture(r);
+  });
+  active=true;
+  const send=async()=>{if(!active||!pose)return;try{await pose.send({image:video})}catch(e){}raf=requestAnimationFrame(send)}
+  send();
+ }catch(e){
+  const msg=$("liveMsg")||$("postureLive");
+  if(msg){msg.className="live warn";msg.textContent="카메라 권한을 허용해야 활동할 수 있어요. 브라우저 주소창의 카메라 권한을 확인해 주세요."}
+ }
 }
 function drawSkeleton(canvas,landmarks){
- if(!canvas||!landmarks)return;const c=canvas.getContext("2d"),w=canvas.width=canvas.clientWidth*devicePixelRatio,h=canvas.height=canvas.clientHeight*devicePixelRatio;
+ if(!canvas||!landmarks)return;
+ const c=canvas.getContext("2d"),w=canvas.width=canvas.clientWidth*devicePixelRatio,h=canvas.height=canvas.clientHeight*devicePixelRatio;
  c.clearRect(0,0,w,h);c.lineWidth=3*devicePixelRatio;c.strokeStyle="#45d483";c.fillStyle="#45d483";
  const pairs=[[11,12],[11,13],[13,15],[12,14],[14,16],[11,23],[12,24],[23,24],[23,25],[25,27],[24,26],[26,28]];
  pairs.forEach(([a,b])=>{if(landmarks[a]&&landmarks[b]){c.beginPath();c.moveTo((1-landmarks[a].x)*w,landmarks[a].y*h);c.lineTo((1-landmarks[b].x)*w,landmarks[b].y*h);c.stroke()}});
  landmarks.forEach((p,i)=>{if(i>10&&p.visibility>.45){c.beginPath();c.arc((1-p.x)*w,p.y*h,5*devicePixelRatio,0,Math.PI*2);c.fill()}});
 }
 function angle(a,b,c){let x=a.x-b.x,y=a.y-b.y,u=c.x-b.x,v=c.y-b.y;return Math.acos(Math.max(-1,Math.min(1,(x*u+y*v)/(Math.hypot(x,y)*Math.hypot(u,v)))))*180/Math.PI}
+function showResult(title,score,unit,icon,advice){
+ stopAll();
+ $("stationBody").innerHTML=`<div class="panel result"><div class="resultIcon">${icon}</div><h2>${title}</h2><div class="resultScore">${score}<span style="font-size:30px"> ${unit}</span></div><div>${advice||"좋아요! 기록이 저장되었습니다."}</div><div class="resultActions"><button id="retryBtn">🔄 다시 하기</button><button class="light" id="backListBtn">← 스테이션 목록</button></div></div>`;
+ $("retryBtn").addEventListener("click",()=>openStation(currentStation));
+ $("backListBtn").addEventListener("click",()=>goHome());
+}
+function finishStation(key,rawScore,icon,advice){
+ const score=Math.max(0,Math.min(100,Math.round(rawScore)));
+ state[key]=score;save();
+ showResult(names[key],score,"점",icon,advice);
+}
 function handleSquat(r){
- const canvas=$("overlay"),p=r.poseLandmarks;if(canvas)drawSkeleton(canvas,p);
- if(!p||!$("count"))return;
+ const p=r.poseLandmarks,canvas=$("overlay");if(canvas)drawSkeleton(canvas,p);
+ if(!p||!$("count")||!active)return;
  const left=angle(p[23],p[25],p[27]),right=angle(p[24],p[26],p[28]),a=(left+right)/2;
- const msg=$("liveMsg");
- if(a<105){phase="down";msg.textContent="⬇️ 좋아요! 충분히 내려갔어요.";msg.className="live good"}
- else if(a>155){if(phase==="down"){count++;$("count").textContent=count}phase="up";msg.textContent="⬆️ 올라오세요. 다리를 펴세요.";msg.className="live"}
- else{msg.textContent="↕️ 무릎을 조금 더 굽혀 보세요.";msg.className="live warn"}
  $("angle").textContent=Math.round(a)+"°";
+ const msg=$("liveMsg");
+ if(a<105){phase="down";msg.textContent="⬇️ 충분히 내려갔어요. 이제 올라오세요.";msg.className="live good"}
+ else if(a>155){if(phase==="down"){count++;$("count").textContent=count}phase="up";msg.textContent="⬆️ 좋아요! 다음 스쿼트로.";msg.className="live"}
+ else{msg.textContent="↕️ 무릎을 조금 더 굽혀 보세요.";msg.className="live warn"}
 }
 function startSquat(){
- count=0;phase="up";$("count").textContent=0;active=true;const end=Date.now()+45000;
- clearInterval(timer);timer=setInterval(()=>{let left=Math.max(0,Math.ceil((end-Date.now())/1000));$("time").textContent=left;if(left<=0){clearInterval(timer);active=false;state.squat=count;save();$("liveMsg").textContent=`🎉 종료! ${count}회 완료`}},200);
+ count=0;phase="up";$("count").textContent=0;active=true;
+ const end=Date.now()+45000;clearInterval(timer);
+ timer=setInterval(()=>{const left=Math.max(0,Math.ceil((end-Date.now())/1000));$("time").textContent=left;
+  if(left<=0){clearInterval(timer);finishStation("squat",count*3,"🏋️",`${count}회 수행 · 다음에는 무릎을 조금 더 깊게 굽혀보세요.`)}
+ },200)
 }
 function setupReachGame(kind){
- const body=kind==="reaction"?`
- <div class="panel"><h2>⚡ 움직임 반응 레이스</h2><p>카메라에 내 몸이 보이도록 서세요. <b>빨간 원에 손을 직접 가져가야</b> 성공합니다.</p>
- <div class="station-layout"><div class="motion-game" id="reachGame"><video id="video" autoplay playsinline></video><canvas id="overlay" class="overlay"></canvas><div id="target" class="target red"><span>●</span></div></div>
- <div class="guide"><h3>🎯 동작 기준</h3><div class="guide-row"><span class="badge">1</span><span>몸 전체가 카메라에 보이게 서세요.</span></div><div class="guide-row"><span class="badge">2</span><span>초록색 점이 <b>손목</b>입니다.</span></div><div class="guide-row"><span class="badge">3</span><span>손목을 빨간 목표까지 빠르게 움직이세요.</span></div><div id="liveMsg" class="live">시작을 누르면 목표가 나타납니다.</div></div></div>
- <div class="stat"><div class="statbox">성공<div class="num" id="rs">0</div></div><div class="statbox">남은 시간<div class="num" id="rt">45</div></div></div><button id="startReachBtn">45초 시작</button></div>`
- :
- `<div class="panel"><h2>🦟 모기 잡기</h2><p>클릭하지 않습니다! <b>손을 움직여 모기에 닿으면</b> 잡힙니다.</p>
- <div class="station-layout"><div class="motion-game" id="reachGame"><video id="video" autoplay playsinline></video><canvas id="overlay" class="overlay"></canvas><div id="target" class="target purple"><span>🦟</span></div></div>
- <div class="guide"><h3>🦟 동작 기준</h3><div class="guide-row"><span class="badge">1</span><span>화면 속 내 초록색 손목 점을 확인하세요.</span></div><div class="guide-row"><span class="badge">2</span><span>모기가 나타난 곳으로 손을 크게 뻗으세요.</span></div><div class="guide-row"><span class="badge">3</span><span>손목 점이 모기에 닿으면 1마리 성공입니다.</span></div><div id="liveMsg" class="live">시작하면 모기가 나타납니다.</div></div></div>
- <div class="stat"><div class="statbox">잡은 모기<div class="num" id="hs">0</div></div><div class="statbox">남은 시간<div class="num" id="ht">30</div></div></div><button id="startBugBtn">30초 시작</button></div>`;
- $("stationBody").innerHTML=body;
- $("startReachBtn")?.addEventListener("click",()=>startReach("reaction"));
- $("startBugBtn")?.addEventListener("click",()=>startReach("bug"));
+ const isBug=kind==="bug";
+ $("stationBody").innerHTML=`<div class="panel"><h2>${isBug?"🦟 모기 잡기":"⚡ 반응속도 레이스"}</h2>
+ <p>${isBug?"클릭하지 않습니다! 손을 움직여 모기에 닿으면 잡힙니다.":"마우스는 사용하지 않습니다! 화면의 목표까지 손을 직접 빠르게 뻗어 반응하세요."}</p>
+ <div class="station-layout"><div class="motion-game" id="reachGame">
+ <video id="video" autoplay playsinline></video><canvas id="overlay" class="overlay"></canvas>
+ <div class="targetLabel">🟢 초록 점 = 내 손목</div>
+ <div id="target" class="target ${isBug?"purple":"red"}"><span>${isBug?"🦟":"●"}</span></div></div>
+ <div class="guide"><h3>🎯 동작 기준</h3>
+ <div class="guide-row"><span class="badge">1</span><span>몸이 카메라에 보이도록 서세요.</span></div>
+ <div class="guide-row"><span class="badge">2</span><span>카메라 화면의 <b>초록색 손목 점</b>을 확인하세요.</span></div>
+ <div class="guide-row"><span class="badge">3</span><span>${isBug?"모기가 나타난 곳까지 손을 크게 뻗으세요.":"목표가 나타난 위치까지 손을 빠르게 이동하세요."}</span></div>
+ <div class="guide-row"><span class="badge">4</span><span>손목 점이 목표에 닿으면 자동으로 성공합니다.</span></div>
+ <div id="liveMsg" class="live">시작을 누르면 목표가 나타납니다.</div>
+ <div class="stat"><div class="statbox">${isBug?"잡은 모기":"성공"}<div class="num" id="reachScore">0</div></div>
+ <div class="statbox">남은 시간<div class="num" id="reachTime">${isBug?"30":"45"}</div></div></div>
+ <button id="startReachBtn">${isBug?"30초":"45초"} 시작</button></div></div></div>`;
+ $("startReachBtn").addEventListener("click",()=>startReach(kind));
  startPoseCamera($("video"),kind);
 }
 function placeTarget(){
  const g=$("reachGame"),t=$("target");if(!g||!t)return;
- const size=70,tW=g.clientWidth,tH=g.clientHeight;
- t.style.width=size+"px";t.style.height=size+"px";
- t.style.left=Math.max(5,Math.random()*(tW-size-10))+"px";t.style.top=Math.max(5,Math.random()*(tH-size-10))+"px";
- t.style.display="block";targetBorn=performance.now();
+ const size=74;t.style.width=size+"px";t.style.height=size+"px";
+ t.style.left=Math.max(5,Math.random()*(g.clientWidth-size-10))+"px";
+ t.style.top=Math.max(45,Math.random()*(g.clientHeight-size-55))+"px";
+ t.style.display="block";
 }
 function startReach(kind){
- gameScore=0;mode=kind;active=true;$("rs")&&($("rs").textContent=0);$("hs")&&($("hs").textContent=0);placeTarget();
- const seconds=kind==="reaction"?45:30,end=Date.now()+seconds*1000;
- clearInterval(timer);timer=setInterval(()=>{const left=Math.max(0,Math.ceil((end-Date.now())/1000));const el=kind==="reaction"?$("rt"):$("ht");if(el)el.textContent=left;if(left<=0){clearInterval(timer);active=false;$("target").style.display="none";state[kind==="reaction"?"reaction":"hand"]=gameScore;save();}},150);
+ gameScore=0;mode=kind;active=true;$("reachScore").textContent=0;placeTarget();
+ const seconds=kind==="reaction"?45:30,end=Date.now()+seconds*1000;clearInterval(timer);
+ timer=setInterval(()=>{const left=Math.max(0,Math.ceil((end-Date.now())/1000));$("reachTime").textContent=left;
+  if(left<=0){clearInterval(timer);finishStation(kind==="reaction"?"reaction":"hand",gameScore*(kind==="reaction"?4:3),kind==="reaction"?"⚡":"🦟",`${gameScore}회 성공 · 목표까지 손을 직접 움직여 반응한 기록입니다.`)}
+ },150)
 }
 function handleReach(r){
  const p=r.poseLandmarks,canvas=$("overlay");if(canvas)drawSkeleton(canvas,p);if(!active||!p||!$("target"))return;
@@ -158,54 +210,87 @@ function handleReach(r){
  const targets=[p[15],p[16]].filter(x=>x&&x.visibility>.5);
  const tx=tr.left+tr.width/2,ty=tr.top+tr.height/2;
  let hit=false;
- targets.forEach(w=>{const sx=rect.left+(1-w.x)*rect.width,sy=rect.top+w.y*rect.height;if(Math.hypot(sx-tx,sy-ty)<55)hit=true});
- if(hit){gameScore++;if($("rs"))$("rs").textContent=gameScore;if($("hs"))$("hs").textContent=gameScore;$("liveMsg").textContent="🎯 성공! 다음 목표로!";$("liveMsg").className="live good";placeTarget()}
+ targets.forEach(w=>{const sx=rect.left+(1-w.x)*rect.width,sy=rect.top+w.y*rect.height;if(Math.hypot(sx-tx,sy-ty)<60)hit=true});
+ if(hit){gameScore++;$("reachScore").textContent=gameScore;$("liveMsg").textContent="🎯 성공! 다음 목표로 이동하세요.";$("liveMsg").className="live good";placeTarget()}
  else{$("liveMsg").textContent="🟢 초록색 손목 점을 목표까지 움직이세요.";$("liveMsg").className="live"}
 }
 function handleJump(r){
- const p=r.poseLandmarks,canvas=$("overlay");if(canvas)drawSkeleton(canvas,p);if(!p||!$("count"))return;
+ const p=r.poseLandmarks,canvas=$("overlay");if(canvas)drawSkeleton(canvas,p);if(!p||!$("count")||!active)return;
  const y=(p[23].y+p[24].y)/2;
  if(lastHipY!==null&&lastHipY-y>.045){count++;$("count").textContent=count;addCloud(count);$("liveMsg").textContent="☁️ 점프 성공!";$("liveMsg").className="live good"}
- else if(lastHipY!==null&&y-lastHipY>.02){$("liveMsg").textContent="⬇️ 착지 후 다시 힘차게 점프하세요.";$("liveMsg").className="live"}
+ else if(lastHipY!==null&&y-lastHipY>.02){$("liveMsg").textContent="⬇️ 착지 후 다시 점프하세요.";$("liveMsg").className="live"}
  lastHipY=y;
 }
-function addCloud(n){const c=document.createElement("div");c.textContent="☁️";c.style.cssText=`position:absolute;font-size:42px;left:${8+(n%7)*13}%;bottom:${10+Math.min(76,n*7)}%`;$("clouds").appendChild(c);$("player").style.bottom=Math.min(80,18+n*7)+"%"}
+function addCloud(n){const c=document.createElement("div");c.className="cloud";c.textContent="☁️";c.style.left=`${8+(n%7)*13}%`;c.style.bottom=`${10+Math.min(76,n*7)}%`;$("clouds").appendChild(c);$("player").style.bottom=Math.min(80,18+n*7)+"%"}
 function startJump(){
- count=0;lastHipY=null;$("clouds").innerHTML="";$("player").style.bottom="18%";active=true;const end=Date.now()+30000;
- clearInterval(timer);timer=setInterval(()=>{const left=Math.max(0,Math.ceil((end-Date.now())/1000));$("jt").textContent=left;if(left<=0){clearInterval(timer);active=false;state.jump=count;save();$("liveMsg").textContent=`🎉 종료! ${count}회 점프`}},200)
+ count=0;lastHipY=null;$("clouds").innerHTML="";$("player").style.bottom="18%";active=true;
+ const end=Date.now()+30000;clearInterval(timer);
+ timer=setInterval(()=>{const left=Math.max(0,Math.ceil((end-Date.now())/1000));$("jt").textContent=left;
+  if(left<=0){clearInterval(timer);finishStation("jump",count*2,"☁️",`${count}회 점프 · 실제 점프 움직임으로 기록되었습니다.`)}
+ },200)
 }
+let postureGood=0;
 function handlePosture(r){
- const p=r.poseLandmarks,canvas=$("overlay");if(canvas)drawSkeleton(canvas,p);if(!p||!$("postureLive"))return;
+ const p=r.poseLandmarks,canvas=$("overlay");if(canvas)drawSkeleton(canvas,p);if(!p||!$("postureLive")||!active)return;
  const shoulder=Math.abs(p[11].y-p[12].y),hip=Math.abs(p[23].y-p[24].y);
- if(shoulder<.035&&hip<.045){$("postureLive").textContent="✅ 기준선에 잘 맞아요. 그대로 유지하세요."; $("postureLive").className="live good"}
- else if(shoulder>=.035){$("postureLive").textContent="↔️ 어깨가 기울었어요. 양쪽 어깨를 수평으로 맞춰보세요."; $("postureLive").className="live warn"}
- else{$("postureLive").textContent="↔️ 골반이 기울었어요. 골반을 수평으로 맞춰보세요."; $("postureLive").className="live warn"}
+ if(shoulder<.035&&hip<.045){postureGood++;$("postureLive").textContent="✅ 좋아요! 어깨와 골반을 수평으로 유지하세요.";$("postureLive").className="live good"}
+ else if(shoulder>=.035){$("postureLive").textContent="↔️ 어깨가 기울었어요. 양쪽 어깨를 수평으로 맞춰보세요.";$("postureLive").className="live warn"}
+ else{$("postureLive").textContent="↔️ 골반이 기울었어요. 골반을 수평으로 맞춰보세요.";$("postureLive").className="live warn"}
 }
 function startPosture(){
- active=true;let goodFrames=0,end=Date.now()+10000;clearInterval(timer);
- timer=setInterval(()=>{const left=Math.max(0,Math.ceil((end-Date.now())/1000));$("pt").textContent=left;if(left<=0){clearInterval(timer);active=false;state.posture=goodFrames>=60?100:Math.round(goodFrames/60*100);save();$("postureLive").textContent=`🏆 측정 완료! 자세 유지 점수 ${state.posture}점`;}},167);
- const check=setInterval(()=>{if(!active){clearInterval(check);return}const txt=$("postureLive")?.textContent||"";if(txt.startsWith("✅"))goodFrames++},167);
+ postureGood=0;active=true;const end=Date.now()+10000;clearInterval(timer);
+ timer=setInterval(()=>{const left=Math.max(0,Math.ceil((end-Date.now())/1000));$("pt").textContent=left;
+  if(left<=0){clearInterval(timer);finishStation("posture",postureGood/60*100,"🧍",`기준 자세를 유지한 시간에 따라 점수를 계산했습니다.`)}
+ },167)
 }
+let currentStation=0;
 function openStation(n){
- stopAll();count=0;phase="up";lastHipY=null;gameScore=0;
+ currentStation=n;stopAll();count=0;phase="up";lastHipY=null;gameScore=0;
  $("home").classList.add("hidden");$("station").classList.remove("hidden");
- $("title").innerHTML=`<h2 style="display:inline;margin-left:12px">${["","🏋️ 스쿼트 챌린지","⚡ 움직임 반응 레이스","☁️ 구름 계단 점프","🦟 모기 잡기","🧍 AI 자세 체크"][n]}</h2>`;
+ $("title").innerHTML=`<h2 style="display:inline;margin-left:12px">${["","🏋️ 스쿼트 챌린지","⚡ 반응속도 레이스","☁️ 구름 계단 점프","🦟 모기 잡기","🧍 AI 자세 체크"][n]}</h2>`;
  if(n===1){
-  $("stationBody").innerHTML=`<div class="panel"><h2>🏋️ 스쿼트 챌린지</h2><div class="station-layout"><div class="video-wrap"><video id="video" autoplay playsinline></video><canvas id="overlay" class="overlay"></canvas></div><div class="guide"><h3>🏋️ 동작 기준</h3><div class="guide-row"><span class="badge">1</span><span>머리부터 발끝까지 화면에 들어오게 서세요.</span></div><div class="guide-row"><span class="badge">2</span><span><b>초록색 선</b>은 AI가 인식한 몸의 관절입니다.</span></div><div class="guide-row"><span class="badge">3</span><span>무릎을 충분히 굽혀 <b>105° 이하</b>로 내려가세요.</span></div><div class="guide-row"><span class="badge">4</span><span>다시 일어나면 1회로 인정됩니다.</span></div><div id="liveMsg" class="live">카메라를 준비하고 있습니다...</div><div class="stat"><div class="statbox">무릎 각도<div class="num" id="angle">-</div></div><div class="statbox">횟수<div class="num" id="count">0</div></div><div class="statbox">남은 시간<div class="num" id="time">45</div></div></div><button id="startSquatBtn">45초 시작</button></div></div></div>`;
+  $("stationBody").innerHTML=`<div class="panel"><h2>🏋️ 스쿼트 챌린지</h2><div class="station-layout">
+  <div class="video-wrap"><video id="video" autoplay playsinline></video><canvas id="overlay" class="overlay"></canvas></div>
+  <div class="guide"><h3>🏋️ 동작 기준</h3>
+  <div class="guide-row"><span class="badge">1</span><span>머리부터 발끝까지 화면에 들어오게 서세요.</span></div>
+  <div class="guide-row"><span class="badge">2</span><span><b>초록색 선</b>은 AI가 인식한 관절입니다.</span></div>
+  <div class="guide-row"><span class="badge">3</span><span>무릎을 충분히 굽혀 <b>105° 이하</b>로 내려가세요.</span></div>
+  <div class="guide-row"><span class="badge">4</span><span>다시 일어나면 1회로 인정됩니다.</span></div>
+  <div id="liveMsg" class="live">카메라를 준비하고 있습니다...</div>
+  <div class="stat"><div class="statbox">무릎 각도<div class="num" id="angle">-</div></div><div class="statbox">횟수<div class="num" id="count">0</div></div><div class="statbox">남은 시간<div class="num" id="time">45</div></div></div>
+  <button id="startSquatBtn">45초 시작</button></div></div></div>`;
   $("startSquatBtn").addEventListener("click",startSquat);startPoseCamera($("video"),"squat");
  }
  if(n===2)setupReachGame("reaction");
  if(n===3){
-  $("stationBody").innerHTML=`<div class="panel"><h2>☁️ 구름 계단 점프</h2><div class="station-layout"><div><div class="video-wrap"><video id="video" autoplay playsinline></video><canvas id="overlay" class="overlay"></canvas></div><div class="motion-game" style="margin-top:12px"><div id="clouds" style="position:absolute;inset:0"></div><div id="player" style="position:absolute;left:50%;transform:translateX(-50%);bottom:18%;font-size:54px">🏃</div></div></div><div class="guide"><h3>☁️ 동작 기준</h3><div class="guide-row"><span class="badge">1</span><span>발이 화면에 보이도록 카메라에서 거리를 잡으세요.</span></div><div class="guide-row"><span class="badge">2</span><span>몸의 <b>엉덩이 높이가 위로 빠르게 이동</b>하면 점프로 판정합니다.</span></div><div class="guide-row"><span class="badge">3</span><span>착지 후 다시 힘차게 점프하세요.</span></div><div id="liveMsg" class="live">카메라를 준비하고 있습니다...</div><div class="stat"><div class="statbox">점프<div class="num" id="count">0</div></div><div class="statbox">남은 시간<div class="num" id="jt">30</div></div></div><button id="startJumpBtn">30초 시작</button></div></div></div>`;
+  $("stationBody").innerHTML=`<div class="panel"><h2>☁️ 구름 계단 점프</h2><div class="station-layout"><div>
+  <div class="video-wrap"><video id="video" autoplay playsinline></video><canvas id="overlay" class="overlay"></canvas></div>
+  <div class="cloudArea" style="margin-top:12px"><div id="clouds"></div><div id="player" style="bottom:18%">🏃</div></div></div>
+  <div class="guide"><h3>☁️ 동작 기준</h3>
+  <div class="guide-row"><span class="badge">1</span><span>발이 화면에 보이도록 카메라에서 거리를 잡으세요.</span></div>
+  <div class="guide-row"><span class="badge">2</span><span>엉덩이 높이가 위로 빠르게 이동하면 점프로 판정합니다.</span></div>
+  <div class="guide-row"><span class="badge">3</span><span>착지 후 다시 힘차게 점프하세요.</span></div>
+  <div id="liveMsg" class="live">카메라를 준비하고 있습니다...</div>
+  <div class="stat"><div class="statbox">점프<div class="num" id="count">0</div></div><div class="statbox">남은 시간<div class="num" id="jt">30</div></div></div>
+  <button id="startJumpBtn">30초 시작</button></div></div></div>`;
   $("startJumpBtn").addEventListener("click",startJump);startPoseCamera($("video"),"jump");
  }
  if(n===4)setupReachGame("bug");
  if(n===5){
-  $("stationBody").innerHTML=`<div class="panel"><h2>🧍 AI 자세 체크</h2><div class="station-layout"><div class="video-wrap"><video id="video" autoplay playsinline></video><canvas id="overlay" class="overlay"></canvas></div><div class="guide"><h3>🧍 동작 기준</h3><div class="guide-row"><span class="badge">1</span><span>카메라를 정면으로 바라보세요.</span></div><div class="guide-row"><span class="badge">2</span><span><b>초록색 관절선</b>과 몸의 위치를 확인하세요.</span></div><div class="guide-row"><span class="badge">3</span><span>어깨와 골반을 수평으로 맞추고 10초 유지합니다.</span></div><div id="postureLive" class="live">카메라를 준비하고 있습니다...</div><div class="stat"><div class="statbox">남은 시간<div class="num" id="pt">10</div></div></div><button id="startPostureBtn">10초 측정</button></div></div></div>`;
+  $("stationBody").innerHTML=`<div class="panel"><h2>🧍 AI 자세 체크</h2><div class="station-layout">
+  <div class="video-wrap"><video id="video" autoplay playsinline></video><canvas id="overlay" class="overlay"></canvas></div>
+  <div class="guide"><h3>🧍 동작 기준</h3>
+  <div class="guide-row"><span class="badge">1</span><span>카메라를 정면으로 바라보세요.</span></div>
+  <div class="guide-row"><span class="badge">2</span><span><b>초록색 관절선</b>을 확인하세요.</span></div>
+  <div class="guide-row"><span class="badge">3</span><span>어깨와 골반을 수평으로 맞추고 10초 유지합니다.</span></div>
+  <div id="postureLive" class="live">카메라를 준비하고 있습니다...</div>
+  <div class="stat"><div class="statbox">남은 시간<div class="num" id="pt">10</div></div></div>
+  <button id="startPostureBtn">10초 측정</button></div></div></div>`;
   $("startPostureBtn").addEventListener("click",startPosture);startPoseCamera($("video"),"posture");
  }
 }
-$("homeBtn").addEventListener("click",()=>{stopAll();$("station").classList.add("hidden");$("home").classList.remove("hidden");render()});
+function goHome(){stopAll();$("station").classList.add("hidden");$("home").classList.remove("hidden");render()}
+$("homeBtn").addEventListener("click",goHome);
 document.querySelectorAll(".card").forEach(c=>c.addEventListener("click",()=>openStation(Number(c.dataset.station))));
 $("resetBtn").addEventListener("click",()=>{localStorage.removeItem("gym5");location.reload()});
 render();
