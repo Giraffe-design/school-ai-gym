@@ -34,18 +34,19 @@ button{border:0;border-radius:12px;padding:12px 17px;background:#172033;color:#f
 </style>
 </head>
 <body>
-<header><div><h1>🏃 우리 학교 AI 체육관</h1><div class="sub">7 STATION · 체육수업 모션 챌린지</div></div><div class="scoreTop">오늘 <span id="topScore">0</span>점</div></header>
+<header><div><h1>🏃 우리 학교 AI 체육관</h1><div class="sub">8 STATION · 체육수업 모션 챌린지</div></div><div class="scoreTop">오늘 <span id="topScore">0</span>점</div></header>
 <main>
 <section id="home">
-<div class="hero"><div style="opacity:.75;font-weight:800">TODAY'S PE CHALLENGE</div><h2>오늘의 체육 점수</h2><div class="bigscore" id="dailyScore">0</div><div id="scoreText">7개 스테이션에 도전해 보세요!</div><div class="progress" id="progress"></div></div>
+<div class="hero"><div style="opacity:.75;font-weight:800">TODAY'S PE CHALLENGE</div><h2>오늘의 체육 점수</h2><div class="bigscore" id="dailyScore">0</div><div id="scoreText">8개 스테이션에 도전해 보세요!</div><div class="progress" id="progress"></div></div>
 <div class="grid">
 <div class="card" data-station="1"><div class="n">STATION 1</div><div class="emoji">🏋️</div><h3>스쿼트 챌린지</h3><p>무릎 각도와 몸의 움직임으로 스쿼트를 측정합니다.</p></div>
 <div class="card" data-station="2"><div class="n">STATION 2</div><div class="emoji">⚡</div><h3>반응속도 레이스</h3><p>목표까지 손을 직접 움직여 빠르게 반응합니다.</p></div>
 <div class="card" data-station="3"><div class="n">STATION 3</div><div class="emoji">☁️</div><h3>구름 계단 점프</h3><p>엉덩이 높이의 움직임을 기준으로 실제 점프를 인식합니다.</p></div>
 <div class="card" data-station="4"><div class="n">STATION 4</div><div class="emoji">🦟</div><h3>모기 잡기</h3><p>손을 움직여 화면 속 모기를 잡습니다.</p></div>
 <div class="card" data-station="5"><div class="n">STATION 5</div><div class="emoji">🧍</div><h3>AI 자세 체크</h3><p>어깨와 골반을 맞추고 자세를 유지합니다.</p></div>
-<div class="card" data-station="6"><div class="n">STATION 6</div><div class="emoji">🏐</div><h3>공 피하기</h3><p>날아오는 공을 몸을 움직여 피합니다. 맞은 공이 적을수록 높은 점수!</p></div>
-<div class="card" data-station="7"><div class="n">STATION 7</div><div class="emoji">🏀</div><h3>AI 농구 슛</h3><p>공을 던지는 동작을 하면 가상 공이 농구 골대로 날아갑니다.</p></div>
+<div class="card" data-extra="rope"><div class="n">STATION 6</div><div class="emoji">🪢</div><h3>줄넘기 챌린지</h3><p>실제로 뛰는 동작을 AI가 인식해 줄넘기 횟수를 측정합니다.</p></div>
+<div class="card" data-extra="soccer"><div class="n">STATION 7</div><div class="emoji">⚽</div><h3>축구 수비 이동</h3><p>한 번에 하나씩 날아오는 공에 맞춰 좌우로 수비 이동합니다.</p></div>
+<div class="card" data-extra="volley"><div class="n">STATION 8</div><div class="emoji">🏐</div><h3>배구 리시브</h3><p>공 방향으로 이동하고 두 손을 모아 리시브 자세를 만듭니다.</p></div>
 </div>
 <div class="panel" style="margin-top:17px"><h2>📊 나의 기록</h2><div id="records"></div></div>
 <div class="panel"><button id="resetBtn">오늘 기록 초기화</button></div>
@@ -54,18 +55,18 @@ button{border:0;border-radius:12px;padding:12px 17px;background:#172033;color:#f
 </main>
 
 <script>
-const keys=["squat","reaction","jump","hand","posture","dodge","basket"];
-const names={squat:"스쿼트",reaction:"반응속도",jump:"점프",hand:"모기 잡기",posture:"자세 체크",dodge:"공 피하기",basket:"AI 농구 슛"};
+const keys=["squat","reaction","jump","hand","posture","rope","soccer","volley"];
+const names={squat:"스쿼트",reaction:"반응속도",jump:"점프",hand:"모기 잡기",posture:"자세 체크",rope:"줄넘기",soccer:"축구 수비",volley:"배구 리시브"};
 const state=JSON.parse(localStorage.getItem("gym5")||"{}");
 let stream=null,pose=null,raf=null,timer=null,active=false,currentStation=0;
 let count=0,phase="up",hipPrev=null,hipLow=false,gameScore=0,mode=null,postureGood=0,reachPrev=null;
 function $(id){return document.getElementById(id)}
 function save(){localStorage.setItem("gym5",JSON.stringify(state));render()}
-function calc(){return Math.round(keys.reduce((sum,k)=>sum+(typeof state[k]==="number"?state[k]:0),0)/7)}
+function calc(){return Math.round(keys.reduce((sum,k)=>sum+(typeof state[k]==="number"?state[k]:0),0)/8)}
 function render(){
  const score=calc(),done=keys.filter(k=>typeof state[k]==="number").length;
  $("dailyScore").textContent=score;$("topScore").textContent=score;
- $("scoreText").textContent=done===7?"🎉 7개 스테이션 완료! 오늘의 체육 챌린지 성공!":`${done}/7 스테이션 완료 · 다음 스테이션에 도전하세요!`;
+ $("scoreText").textContent=done===8?"🎉 8개 스테이션 완료! 오늘의 체육 챌린지 성공!":`${done}/8 스테이션 완료 · 다음 스테이션에 도전하세요!`;
  $("progress").innerHTML=keys.map(k=>`<div class="dot ${typeof state[k]==="number"?"done":""}"></div>`).join("");
  $("records").innerHTML=keys.map((k,i)=>`<div style="display:inline-block;margin:4px;background:#f0f3f8;border-radius:13px;padding:10px 14px">${i+1}. ${names[k]} <b style="font-size:21px">${state[k]??"-"}</b></div>`).join("");
 }
@@ -122,27 +123,21 @@ function handleDodge(r){latestPose=r.poseLandmarks;const p=latestPose;if(p&&$("d
 function startBasket(){gameScore=0;active=true;$("made").textContent=0;$("shot").textContent=0;reachPrev=null;let basketCooldown=0;const end=Date.now()+30000;$("liveMsg").textContent="🏀 오른쪽 위 골대를 보고, 한 손을 골대 방향으로 던져보세요!";timer=setInterval(()=>{let t=Math.max(0,Math.ceil((end-Date.now())/1000));$("basketTime").textContent=t;if(!t){clearInterval(timer);finish("basket",Math.min(100,gameScore*20),"🏀",`${gameScore}골 성공 · 화면의 골대를 향해 던지는 동작으로 판정했습니다.`)}},150);window._basketCooldown=()=>basketCooldown;window._setBasketCooldown=v=>basketCooldown=v}
 function handleBasket(r){const p=r.poseLandmarks;if(!p||!active)return;const candidates=[p[15],p[16]].filter(w=>w&&w.visibility>.55);if(!candidates.length)return;let w=candidates.sort((a,b)=>a.y-b.y)[0];const mx=1-w.x,now=performance.now();if(!reachPrev){reachPrev={x:mx,y:w.y,t:now};return}const dt=Math.max(16,now-reachPrev.t),dx=(mx-reachPrev.x)/dt,up=(reachPrev.y-w.y)/dt;let cd=window._basketCooldown?window._basketCooldown():0;if(cd>0){window._setBasketCooldown(Math.max(0,cd-dt))}else if(up>.00075&&dx>.00015&&w.y<p[11].y+.02){shootBall(mx,w.y);$("shot").textContent=Number($("shot").textContent)+1;window._setBasketCooldown(450);$("liveMsg").textContent="🏀 슛! 골대를 향해 날아갑니다.";$("liveMsg").className="live good"}reachPrev={x:mx,y:w.y,t:now}}
 function shootBall(x,y){const area=$("basketArea"),ball=document.createElement("div");ball.className="basketBall";ball.style.left=(x*100)+"%";ball.style.top=(y*100)+"%";area.appendChild(ball);const sx=x*area.clientWidth,sy=y*area.clientHeight,ex=area.clientWidth*.86,ey=area.clientHeight*.23;let t0=performance.now(),dur=720;function anim(t){let q=Math.min(1,(t-t0)/dur),e=q*q*(3-2*q);ball.style.left=(sx+(ex-sx)*e)/area.clientWidth*100+"%";ball.style.top=(sy+(ey-sy)*e-90*Math.sin(Math.PI*e))/area.clientHeight*100+"%";if(q<1)requestAnimationFrame(anim);else{ball.remove();gameScore++;$("made").textContent=gameScore;$("liveMsg").textContent="🎯 골인! 다음 공을 던져보세요."}}requestAnimationFrame(anim)}
-function openStation(n){currentStation=n;stopAll();$("home").classList.add("hidden");$("station").classList.remove("hidden");$("title").innerHTML=`<h2 style="display:inline;margin-left:12px">${["","🏋️ 스쿼트 챌린지","⚡ 반응속도 레이스","☁️ 구름 계단 점프","🦟 모기 잡기","🧍 AI 자세 체크","🏐 공 피하기","🏀 AI 농구 슛"][n]}</h2>`;
+function openStation(n){currentStation=n;stopAll();$("home").classList.add("hidden");$("station").classList.remove("hidden");$("title").innerHTML=`<h2 style="display:inline;margin-left:12px">${["","🏋️ 스쿼트 챌린지","⚡ 반응속도 레이스","☁️ 구름 계단 점프","🦟 모기 잡기","🧍 AI 자세 체크"][n]}</h2>`;
  if(n===1){$("stationBody").innerHTML=`<div class="panel"><h2>🏋️ 스쿼트 챌린지</h2><div class="station-layout"><div class="video-wrap"><video id="video" autoplay playsinline></video><canvas id="overlay" class="overlay"></canvas></div><div class="guide"><h3>동작 기준</h3><div class="guide-row"><span class="badge">1</span><span>전신이 화면에 보이게 서세요.</span></div><div class="guide-row"><span class="badge">2</span><span>초록선은 AI가 보는 관절입니다.</span></div><div class="guide-row"><span class="badge">3</span><span>무릎 105° 이하로 내려가세요.</span></div><div id="liveMsg" class="live">카메라 준비 중...</div><div class="stat"><div class="statbox">무릎<div class="num" id="angle">-</div></div><div class="statbox">횟수<div class="num" id="count">0</div></div><div class="statbox">시간<div class="num" id="time">45</div></div></div><button id="start">45초 시작</button></div></div></div>`;$("start").onclick=startSquat;startCamera($("video"),"squat")}
  if(n===2||n===4){$("stationBody").innerHTML=reachHTML(n===4?"bug":"reach");$("startReachBtn").onclick=()=>startReach(n===4?"bug":"reach");startCamera($("video"),n===4?"bug":"reach")}
  if(n===3){$("stationBody").innerHTML=`<div class="panel"><h2>☁️ 구름 계단 점프</h2><div class="station-layout"><div><div class="video-wrap"><video id="video" autoplay playsinline></video><canvas id="overlay" class="overlay"></canvas></div><div class="cloudArea" style="margin-top:12px"><div id="clouds"></div><div id="player" style="bottom:18%">🏃</div></div></div><div class="guide"><h3>엉덩이 선이 기준!</h3><div class="guide-row"><span class="badge">1</span><span>초록색 관절선을 확인하세요.</span></div><div class="guide-row"><span class="badge">2</span><span><b>양쪽 엉덩이(골반) 중간점의 높이 변화</b>를 기준으로 점프를 판정합니다.</span></div><div class="guide-row"><span class="badge">3</span><span>팔만 움직여서는 점프가 올라가지 않습니다.</span></div><div id="liveMsg" class="live">엉덩이 선이 충분히 위로 이동하면 점프!</div><div class="stat"><div class="statbox">점프<div class="num" id="count">0</div></div><div class="statbox">시간<div class="num" id="jt">30</div></div></div><button id="start">30초 시작</button></div></div></div>`;$("start").onclick=startJump;startCamera($("video"),"jump")}
  if(n===5){$("stationBody").innerHTML=`<div class="panel"><h2>🧍 AI 자세 체크</h2><div class="station-layout"><div class="video-wrap"><video id="video" autoplay playsinline></video><canvas id="overlay" class="overlay"></canvas></div><div class="guide"><h3>동작 기준</h3><div class="guide-row"><span class="badge">1</span><span>카메라를 정면으로 보세요.</span></div><div class="guide-row"><span class="badge">2</span><span>어깨와 골반을 수평으로 맞추세요.</span></div><div id="postureLive" class="live">카메라 준비 중...</div><div class="stat"><div class="statbox">시간<div class="num" id="pt">10</div></div></div><button id="start">10초 측정</button></div></div></div>`;$("start").onclick=startPosture;startCamera($("video"),"posture")}
- if(n===6){$("stationBody").innerHTML=`<div class="panel"><h2>🏐 공 피하기</h2><p>공이 <b>앞쪽 멀리서 내 몸통을 향해 날아옵니다.</b> 공이 가까워지기 전에 몸통을 좌우로 움직여 피하세요. 마우스는 사용하지 않습니다.</p><div class="station-layout"><div class="dodgeArea" id="dodgeArea"><div class="lane"></div><div class="incomingAim" style="left:50%;top:58%"></div><video id="video" autoplay playsinline style="width:100%;height:auto;opacity:.35;transform:scaleX(-1)"></video><canvas id="overlay" class="overlay"></canvas></div><div class="guide"><h3>🏐 피하기 기준</h3><div class="guide-row"><span class="badge">1</span><span>몸 전체가 보이게 서세요.</span></div><div class="guide-row"><span class="badge">2</span><span>공이 <b>점점 커지며 몸통 쪽으로 다가오면 좌우로 이동</b>하세요.</span></div><div class="guide-row"><span class="badge">3</span><span>공에 닿은 횟수가 적을수록 점수가 높습니다.</span></div><div id="dodgeMsg" class="live">시작 버튼을 눌러주세요.</div><div class="stat"><div class="statbox">맞은 공<div class="num" id="hit">0</div></div><div class="statbox">시간<div class="num" id="avoidTime">30</div></div></div><button id="start">30초 시작</button></div></div></div>`;$("start").onclick=startDodge;startCamera($("video"),"dodge")}
- if(n===7){$("stationBody").innerHTML=`<div class="panel"><h2>🏀 AI 농구 슛</h2><p><b>화면에 보이는 골대 방향으로 공을 던지는 동작</b>을 하면 가상 공이 손에서 출발해 골대로 날아갑니다. 마우스/클릭은 사용하지 않습니다.</p><div class="station-layout"><div class="basketArea" id="basketArea"><video id="video" autoplay playsinline style="width:100%;opacity:.35;transform:scaleX(-1)"></video><canvas id="overlay" class="overlay"></canvas><div class="hoop"><div class="backboard"></div><div class="rim"></div><div class="net"></div><div class="hoopLabel">⬆️ 이 골대로 던지세요!</div></div></div><div class="guide"><h3>🏀 슛 동작 기준</h3><div class="guide-row"><span class="badge">1</span><span>화면 왼쪽~가운데에 서고 <b>오른쪽 위 골대</b>가 잘 보이게 하세요.</span></div><div class="guide-row"><span class="badge">2</span><span>한 손을 아래에서 <b>오른쪽 위 골대 방향으로 빠르게 뻗으세요.</b></span></div><div class="guide-row"><span class="badge">3</span><span>던지는 동작이 감지되면 손에서 공이 나와 골대로 날아갑니다.</span></div><div id="liveMsg" class="live">시작 버튼을 누르고 슛!</div><div class="stat"><div class="statbox">성공<div class="num" id="made">0</div></div><div class="statbox">슛<div class="num" id="shot">0</div></div><div class="statbox">시간<div class="num" id="basketTime">30</div></div></div><button id="start">30초 시작</button></div></div></div>`;$("start").onclick=startBasket;startCamera($("video"),"basket")}
 }
 function goHome(){stopAll();$("station").classList.add("hidden");$("home").classList.remove("hidden");render()}
 $("homeBtn").onclick=goHome;$("resetBtn").onclick=()=>{localStorage.removeItem("gym5");location.reload()};
-document.querySelectorAll(".card").forEach(c=>c.onclick=()=>openStation(Number(c.dataset.station)));render();
+document.querySelectorAll(".card").forEach(c=>{
+  c.onclick=()=>{
+    if(c.dataset.extra) openExtraGame(c.dataset.extra);
+    else openStation(Number(c.dataset.station));
+  };
+});render();
 </script>
-
-<div id="extraSports" style="margin-top:24px">
-  <h2>🏅 추가 스포츠 게임</h2>
-  <div class="cards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px">
-    <div class="card" onclick="openExtraGame('rope')"><div class="ico">🪢</div><h3>줄넘기 챌린지</h3><p>가상의 줄을 실제로 뛰어넘기</p></div>
-    <div class="card" onclick="openExtraGame('soccer')"><div class="ico">⚽</div><h3>축구 수비 이동</h3><p>앞에서 날아오는 공을 좌우로 피하기</p></div>
-    <div class="card" onclick="openExtraGame('volley')"><div class="ico">🏐</div><h3>배구 리시브</h3><p>공 방향으로 이동해 리시브 자세 만들기</p></div>
-  </div>
-</div>
 
 <div id="extraGame" style="display:none;position:fixed;inset:0;background:#101820;color:#fff;z-index:9999;padding:18px;overflow:auto">
   <div style="max-width:1100px;margin:auto">
@@ -175,6 +170,7 @@ async function openExtraGame(mode){
   }[mode];
   egTitle.textContent=info[0];egCriteria.innerHTML=info[1];egResult.style.display='none';egStart.disabled=false;
   try{
+    await loadScript("https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js");
     if(!egStream) egStream=await navigator.mediaDevices.getUserMedia({video:true,audio:false});
     egVideo.srcObject=egStream; await egVideo.play();
     egCanvas.width=egVideo.videoWidth||900;egCanvas.height=egVideo.videoHeight||600;
@@ -253,8 +249,8 @@ function spawnSportBall(kind){
   const fromLeft=Math.random()<.5;
   const speed=0.0048 + Math.min(0.006, (30-(egEnd-Date.now())/1000)*0.00022);
   egObjs.push({
-    kind, x:fromLeft:-.12:1.12, y:.56+Math.random()*.08,
-    targetX:fromLeft:.50:.50, targetY:.66,
+    kind, x:fromLeft ? -.12 : 1.12, y:.56+Math.random()*.08,
+    targetX:.50, targetY:.66,
     dir:fromLeft?1:-1, speed, done:false, created:Date.now()
   });
 }
@@ -290,13 +286,8 @@ function drawBallGame(icon){
 function egFinish(){
   egRunning=false;egStart.disabled=false;
   const total=egScore+egMiss,pct=total?Math.round(egScore/total*100):0;
-  egResult.innerHTML=`<h2>게임 종료!</h2><div style="font-size:46px;font-weight:900">${pct}점</div><p>성공 ${egScore}회 · 놓침 ${egMiss}회</p><button onclick="startExtraGame()" style="padding:12px 18px;border:0;border-radius:10px;font-weight:bold">🔄 다시 하기</button>`;
-  egResult.style.display='block';
-}
-
-  egRunning=false;egStart.disabled=false;
-  const total=egScore+egMiss,pct=total?Math.round(egScore/total*100):0;
-  egResult.innerHTML=`<h2>게임 종료!</h2><div style="font-size:46px;font-weight:900">${pct}점</div><p>성공 ${egScore}회 · 놓침 ${egMiss}회</p><button onclick="startExtraGame()" style="padding:12px 18px;border:0;border-radius:10px;font-weight:bold">🔄 다시 하기</button>`;
+  state[egMode]=pct;save();
+  egResult.innerHTML=`<h2>게임 종료!</h2><div style="font-size:46px;font-weight:900">${pct}점</div><p>성공 ${egScore}회 · 놓침 ${egMiss}회</p><button onclick="startExtraGame()" style="padding:12px 18px;border:0;border-radius:10px;font-weight:bold">🔄 다시 하기</button><button onclick="closeExtraGame()" style="padding:12px 18px;border:0;border-radius:10px;font-weight:bold">← 스테이션 목록</button>`;
   egResult.style.display='block';
 }
 </script>
