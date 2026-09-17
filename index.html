@@ -34,10 +34,10 @@ button{border:0;border-radius:12px;padding:12px 17px;background:#172033;color:#f
 </style>
 </head>
 <body>
-<header><div><h1>🏃 우리 학교 AI 체육관</h1><div class="sub">8 STATION · 체육수업 모션 챌린지</div></div><div class="scoreTop">오늘 <span id="topScore">0</span>점</div></header>
+<header><div><h1>🏃 우리 학교 AI 체육관</h1><div class="sub">7 STATION · 체육수업 모션 챌린지</div></div><div class="scoreTop">오늘 <span id="topScore">0</span>점</div></header>
 <main>
 <section id="home">
-<div class="hero"><div style="opacity:.75;font-weight:800">TODAY'S PE CHALLENGE</div><h2>오늘의 체육 점수</h2><div class="bigscore" id="dailyScore">0</div><div id="scoreText">8개 스테이션에 도전해 보세요!</div><div class="progress" id="progress"></div></div>
+<div class="hero"><div style="opacity:.75;font-weight:800">TODAY'S PE CHALLENGE</div><h2>오늘의 체육 점수</h2><div class="bigscore" id="dailyScore">0</div><div id="scoreText">7개 스테이션에 도전해 보세요!</div><div class="progress" id="progress"></div></div>
 <div class="grid">
 <div class="card" data-station="1"><div class="n">STATION 1</div><div class="emoji">🏋️</div><h3>스쿼트 챌린지</h3><p>무릎 각도와 몸의 움직임으로 스쿼트를 측정합니다.</p></div>
 <div class="card" data-station="2"><div class="n">STATION 2</div><div class="emoji">⚡</div><h3>반응속도 레이스</h3><p>목표까지 손을 직접 움직여 빠르게 반응합니다.</p></div>
@@ -45,8 +45,7 @@ button{border:0;border-radius:12px;padding:12px 17px;background:#172033;color:#f
 <div class="card" data-station="4"><div class="n">STATION 4</div><div class="emoji">🦟</div><h3>모기 잡기</h3><p>손을 움직여 화면 속 모기를 잡습니다.</p></div>
 <div class="card" data-station="5"><div class="n">STATION 5</div><div class="emoji">🧍</div><h3>AI 자세 체크</h3><p>어깨와 골반을 맞추고 자세를 유지합니다.</p></div>
 <div class="card" data-extra="rope"><div class="n">STATION 6</div><div class="emoji">🪢</div><h3>줄넘기 챌린지</h3><p>실제로 뛰는 동작을 AI가 인식해 줄넘기 횟수를 측정합니다.</p></div>
-<div class="card" data-extra="soccer"><div class="n">STATION 7</div><div class="emoji">⚽</div><h3>축구 수비 이동</h3><p>한 번에 하나씩 날아오는 공에 맞춰 좌우로 수비 이동합니다.</p></div>
-<div class="card" data-extra="volley"><div class="n">STATION 8</div><div class="emoji">🏐</div><h3>배구 리시브</h3><p>공 방향으로 이동하고 두 손을 모아 리시브 자세를 만듭니다.</p></div>
+<div class="card" data-extra="hitball"><div class="n">STATION 7</div><div class="emoji">🥎</div><h3>양손 공 쳐내기</h3><p>양쪽에서 날아오는 공을 손으로 쳐내세요. 몸에 닿으면 점수가 내려갑니다.</p></div>
 </div>
 <div class="panel" style="margin-top:17px"><h2>📊 나의 기록</h2><div id="records"></div></div>
 <div class="panel"><button id="resetBtn">오늘 기록 초기화</button></div>
@@ -55,18 +54,18 @@ button{border:0;border-radius:12px;padding:12px 17px;background:#172033;color:#f
 </main>
 
 <script>
-const keys=["squat","reaction","jump","hand","posture","rope","soccer","volley"];
-const names={squat:"스쿼트",reaction:"반응속도",jump:"점프",hand:"모기 잡기",posture:"자세 체크",rope:"줄넘기",soccer:"축구 수비",volley:"배구 리시브"};
+const keys=["squat","reaction","jump","hand","posture","rope","hitball"];
+const names={squat:"스쿼트",reaction:"반응속도",jump:"점프",hand:"모기 잡기",posture:"자세 체크",rope:"줄넘기",hitball:"공 쳐내기"};
 const state=JSON.parse(localStorage.getItem("gym5")||"{}");
 let stream=null,pose=null,raf=null,timer=null,active=false,currentStation=0;
 let count=0,phase="up",hipPrev=null,hipLow=false,gameScore=0,mode=null,postureGood=0,reachPrev=null;
 function $(id){return document.getElementById(id)}
 function save(){localStorage.setItem("gym5",JSON.stringify(state));render()}
-function calc(){return Math.round(keys.reduce((sum,k)=>sum+(typeof state[k]==="number"?state[k]:0),0)/8)}
+function calc(){return Math.round(keys.reduce((sum,k)=>sum+(typeof state[k]==="number"?state[k]:0),0)/7)}
 function render(){
  const score=calc(),done=keys.filter(k=>typeof state[k]==="number").length;
  $("dailyScore").textContent=score;$("topScore").textContent=score;
- $("scoreText").textContent=done===8?"🎉 8개 스테이션 완료! 오늘의 체육 챌린지 성공!":`${done}/8 스테이션 완료 · 다음 스테이션에 도전하세요!`;
+ $("scoreText").textContent=done===7?"🎉 7개 스테이션 완료! 오늘의 체육 챌린지 성공!":`${done}/7 스테이션 완료 · 다음 스테이션에 도전하세요!`;
  $("progress").innerHTML=keys.map(k=>`<div class="dot ${typeof state[k]==="number"?"done":""}"></div>`).join("");
  $("records").innerHTML=keys.map((k,i)=>`<div style="display:inline-block;margin:4px;background:#f0f3f8;border-radius:13px;padding:10px 14px">${i+1}. ${names[k]} <b style="font-size:21px">${state[k]??"-"}</b></div>`).join("");
 }
@@ -164,9 +163,8 @@ const egTitle=document.getElementById('egTitle'),egCriteria=document.getElementB
 async function openExtraGame(mode){
   egMode=mode; document.getElementById('extraGame').style.display='block';
   const info={
-    rope:['🪢 줄넘기 챌린지','<b>인식 기준</b><br>• 엉덩이(양쪽 골반 중앙)가 위로 올라갔다가 내려오는 동작<br>• 팔만 움직이는 것은 점프로 인정하지 않음<br>• 30초 동안 최대한 많이 뛰기'],
-    soccer:['⚽ 축구 수비 이동','<b>인식 기준</b><br>• 공은 한 번에 하나씩 앞에서 날아옴<br>• 공이 중앙선에 오기 전에 반대쪽으로 골반을 이동<br>• 시간이 지날수록 공의 속도가 빨라짐<br>• 축구 수비의 사이드 스텝과 연결'],
-    volley:['🏐 배구 리시브','<b>인식 기준</b><br>• 공은 한 번에 하나씩 앞에서 날아옴<br>• 공 방향으로 몸을 이동<br>• 양손을 모아 몸 앞에서 리시브 자세 만들기<br>• 시간이 지날수록 공의 속도가 빨라짐']
+    rope:['🪢 줄넘기 챌린지','<b>인식 기준</b><br>• 화면에 줄 하나만 표시됩니다.<br>• 줄이 발밑을 지나갈 때 점프하세요.<br>• 엉덩이(양쪽 골반 중앙)의 위·아래 움직임으로 점프를 인식합니다.<br>• 30초 동안 최대한 많이 뛰기'],
+    hitball:['🥎 양손 공 쳐내기','<b>게임 방법</b><br>• 가운데에 서서 준비하세요.<br>• 공이 왼쪽 또는 오른쪽에서 한 개씩 날아옵니다.<br>• <b>손(손목)을 움직여 공을 쳐내세요.</b><br>• 공이 몸까지 들어오면 -10점!<br>• 시작 점수는 <b>100점</b>, 맞을 때마다 10점씩 내려갑니다.']
   }[mode];
   egTitle.textContent=info[0];egCriteria.innerHTML=info[1];egResult.style.display='none';egStart.disabled=false;
   try{
@@ -186,23 +184,23 @@ function closeExtraGame(){
   document.getElementById('extraGame').style.display='none';
 }
 function startExtraGame(){
-  egRunning=true;egEnd=Date.now()+30000;egScore=0;egMiss=0;egObjs=[];egPrevHip=null;egArmed=false;egLastAction=0;drawBallGame.nextSpawn=0;egStart.disabled=true;
+  egRunning=true;egEnd=Date.now()+30000;egScore=egMode==='hitball'?100:0;egMiss=0;egObjs=[];egPrevHip=null;egArmed=false;egLastAction=0;drawBallGame.nextSpawn=0;egStart.disabled=true;
+  egResult.style.display='none';
   requestAnimationFrame(egLoop);
 }
 function egLoop(){
   if(!egRunning)return;
   const left=Math.max(0,Math.ceil((egEnd-Date.now())/1000));
-  egHud.textContent=`남은 시간 ${left}초  |  성공 ${egScore}  |  놓침 ${egMiss}`;
+  egHud.textContent=egMode==='hitball'?`남은 시간 ${left}초  |  현재 점수 ${egScore}점  |  맞음 ${egMiss}회`:`남은 시간 ${left}초  |  성공 ${egScore}  |  놓침 ${egMiss}`;
   if(left<=0){egFinish();return}
   if(egMode==='rope') drawRopeGame();
-  else if(egMode==='soccer') drawBallGame('⚽');
-  else drawBallGame('🏐');
+  else drawHitBallGame();
   requestAnimationFrame(egLoop);
 }
 async function egResults(r){
   if(!egRunning||!r.poseLandmarks)return;
   const p=r.poseLandmarks;
-  egCtx.clearRect(0,0,egCanvas.width,egCanvas.height);
+  if(!egCanvas.width||!egCanvas.height){egCanvas.width=egVideo.videoWidth||900;egCanvas.height=egVideo.videoHeight||600}
   egCtx.fillStyle='rgba(70,255,120,.9)';
   p.forEach(x=>{egCtx.beginPath();egCtx.arc((1-x.x)*egCanvas.width,x.y*egCanvas.height,4,0,Math.PI*2);egCtx.fill()});
   const hx=(1-(p[23].x+p[24].x)/2)*egCanvas.width,hy=(p[23].y+p[24].y)/2*egCanvas.height;
@@ -212,72 +210,65 @@ async function egResults(r){
     if(up>10)egArmed=true;
     if(egArmed&&down>6){egScore++;egArmed=false}
     egPrevHip=hy;
-  }else{
-    const handsClose=Math.hypot(p[15].x-p[16].x,p[15].y-p[16].y)<.16;
+  }else if(egMode==='hitball'){
+    const wrists=[
+      {x:(1-p[15].x)*egCanvas.width,y:p[15].y*egCanvas.height},
+      {x:(1-p[16].x)*egCanvas.width,y:p[16].y*egCanvas.height}
+    ];
     egObjs.forEach(o=>{
+      if(o.done)return;
       const ox=o.x*egCanvas.width,oy=o.y*egCanvas.height;
-      const near=Math.hypot(hx-ox,hy-oy)<125;
-      // 축구: 공 쪽으로 골반을 옮긴 뒤, 공이 중앙선에 도달하기 전에
-      // 반대쪽으로 몸을 빼면 수비 성공
-      if(egMode==='soccer' && !o.done){
-        const movedAway = (o.dir>0 && hx>egCanvas.width*.56) || (o.dir<0 && hx<egCanvas.width*.44);
-        if(near && movedAway){o.done=true;egScore++;}
-      }
-      // 배구: 공 쪽으로 이동 + 양손을 모아 리시브 자세
-      if(egMode==='volley' && !o.done && near && handsClose){o.done=true;egScore++;}
+      const hit=wrists.some(w=>Math.hypot(w.x-ox,w.y-oy)<105);
+      if(hit){o.done=true;o.hit=true;egScore=Math.min(100,egScore+0);egMiss+=0;}
     });
   }
 }
 function drawRopeGame(){
-  // 줄넘기: 줄이 실제로 회전하며 아래쪽을 통과하도록 애니메이션
-  const t=Date.now()/260;
-  const cx=egCanvas.width*.5, cy=egCanvas.height*.70;
-  const rx=egCanvas.width*.46, ry=egCanvas.height*.16;
-  const a=t%(Math.PI*2);
-  const ex=cx+rx*Math.cos(a), ey=cy+ry*Math.sin(a);
-  egCtx.strokeStyle='white'; egCtx.lineWidth=7; egCtx.lineCap='round';
-  egCtx.beginPath(); egCtx.moveTo(cx,cy); egCtx.lineTo(ex,ey); egCtx.stroke();
-  // 회전하는 줄의 손잡이
-  egCtx.fillStyle='#ffd54a'; egCtx.beginPath(); egCtx.arc(ex,ey,10,0,Math.PI*2); egCtx.fill();
+  // 매 프레임 전체를 지워서 잔상이 남지 않도록 하고, 줄 하나만 그립니다.
+  egCtx.clearRect(0,0,egCanvas.width,egCanvas.height);
+  const t=Date.now()/520;
+  const cx=egCanvas.width*.5, baseY=egCanvas.height*.82;
+  const leftX=egCanvas.width*.28, rightX=egCanvas.width*.72;
+  const phase=Math.sin(t);
+  // 한 가닥의 줄이 회전하는 모습을 단일 곡선으로 표현
+  const dip=egCanvas.height*(.16+.34*Math.max(0,phase));
+  egCtx.strokeStyle='#ffffff';egCtx.lineWidth=7;egCtx.lineCap='round';egCtx.lineJoin='round';
+  egCtx.beginPath();
+  egCtx.moveTo(leftX,baseY);
+  egCtx.quadraticCurveTo(cx,baseY+dip-egCanvas.height*.16,rightX,baseY);
+  egCtx.stroke();
+  egCtx.fillStyle='#ffd54a';
+  egCtx.beginPath();egCtx.arc(leftX,baseY,9,0,Math.PI*2);egCtx.fill();
+  egCtx.beginPath();egCtx.arc(rightX,baseY,9,0,Math.PI*2);egCtx.fill();
   egCtx.font='bold 22px Arial';egCtx.fillStyle='white';
   egCtx.fillText('줄이 발밑을 지나갈 때 점프!',20,egCanvas.height-24);
 }
-
-function spawnSportBall(kind){
-  // 반드시 한 번에 한 공만 날아오게 함
+function spawnHitBall(){
   if(egObjs.length>0)return;
   const fromLeft=Math.random()<.5;
-  const speed=0.0048 + Math.min(0.006, (30-(egEnd-Date.now())/1000)*0.00022);
-  egObjs.push({
-    kind, x:fromLeft ? -.12 : 1.12, y:.56+Math.random()*.08,
-    targetX:.50, targetY:.66,
-    dir:fromLeft?1:-1, speed, done:false, created:Date.now()
-  });
+  const elapsed=30-Math.max(0,(egEnd-Date.now())/1000);
+  const speed=.0032+Math.min(.0032,elapsed*.00012);
+  egObjs.push({x:fromLeft?-0.10:1.10,y:.32+Math.random()*.34,dir:fromLeft?1:-1,speed,done:false,created:Date.now()});
 }
-
-function drawBallGame(icon){
-  // 초반에는 천천히, 시간이 갈수록 빨라짐. 공은 하나씩.
+function drawHitBallGame(){
+  egCtx.clearRect(0,0,egCanvas.width,egCanvas.height);
+  // 가운데에서 공을 쳐내는 기준선을 보여줌
+  egCtx.strokeStyle='rgba(255,255,255,.35)';egCtx.lineWidth=3;egCtx.setLineDash([10,10]);
+  egCtx.beginPath();egCtx.moveTo(egCanvas.width*.5,0);egCtx.lineTo(egCanvas.width*.5,egCanvas.height);egCtx.stroke();egCtx.setLineDash([]);
+  egCtx.fillStyle='rgba(23,32,51,.72)';egCtx.fillRect(egCanvas.width*.5-115,18,230,42);
+  egCtx.fillStyle='white';egCtx.font='bold 22px Arial';egCtx.textAlign='center';egCtx.fillText('손으로 공을 쳐내세요!',egCanvas.width*.5,47);egCtx.textAlign='left';
   if(egObjs.length===0){
     const elapsed=30-Math.max(0,(egEnd-Date.now())/1000);
-    const interval=Math.max(650,1500-elapsed*28);
-    if(!drawBallGame.nextSpawn || Date.now()>drawBallGame.nextSpawn){
-      spawnSportBall(egMode);
-      drawBallGame.nextSpawn=Date.now()+interval;
-    }
+    const gap=Math.max(450,1100-elapsed*20);
+    if(!drawHitBallGame.nextSpawn||Date.now()>drawHitBallGame.nextSpawn){spawnHitBall();drawHitBallGame.nextSpawn=Date.now()+gap;}
   }
-  egCtx.font='58px Arial';
+  egCtx.font='54px Arial';
   egObjs.forEach(o=>{
     if(o.done)return;
-    o.x += o.dir*o.speed;
-    egCtx.fillText(icon,o.x*egCanvas.width,o.y*egCanvas.height);
-    // 공의 현재 위치와 목표 위치를 시각적으로 표시
-    egCtx.strokeStyle='rgba(255,255,255,.25)';egCtx.lineWidth=2;
-    egCtx.beginPath();egCtx.moveTo(.5*egCanvas.width,.48*egCanvas.height);egCtx.lineTo(.5*egCanvas.width,.88*egCanvas.height);egCtx.stroke();
-
-    // 중앙 충돌선까지 왔는데 성공 조건을 못 만들었으면 놓침
+    o.x+=o.dir*o.speed;
+    egCtx.fillText('🏐',o.x*egCanvas.width-27,o.y*egCanvas.height+18);
     if((o.dir>0&&o.x>=.50)||(o.dir<0&&o.x<=.50)){
-      o.done=true;
-      egMiss++;
+      o.done=true;o.hit=false;egMiss++;egScore=Math.max(0,egScore-10);
     }
   });
   egObjs=egObjs.filter(o=>!o.done);
@@ -285,9 +276,11 @@ function drawBallGame(icon){
 
 function egFinish(){
   egRunning=false;egStart.disabled=false;
-  const total=egScore+egMiss,pct=total?Math.round(egScore/total*100):0;
-  state[egMode]=pct;save();
-  egResult.innerHTML=`<h2>게임 종료!</h2><div style="font-size:46px;font-weight:900">${pct}점</div><p>성공 ${egScore}회 · 놓침 ${egMiss}회</p><button onclick="startExtraGame()" style="padding:12px 18px;border:0;border-radius:10px;font-weight:bold">🔄 다시 하기</button><button onclick="closeExtraGame()" style="padding:12px 18px;border:0;border-radius:10px;font-weight:bold">← 스테이션 목록</button>`;
+  const finalScore=egMode==='hitball'?egScore:(egScore+egMiss?Math.round(egScore/(egScore+egMiss)*100):0);
+  state[egMode]=finalScore;save();
+  egResult.innerHTML=egMode==='hitball'
+    ? `<h2>게임 종료!</h2><div style="font-size:46px;font-weight:900">${finalScore}점</div><p>맞은 공 ${egMiss}회 · 시작 점수 100점에서 10점씩 차감</p><button onclick="startExtraGame()" style="padding:12px 18px;border:0;border-radius:10px;font-weight:bold">🔄 다시 하기</button><button onclick="closeExtraGame()" style="padding:12px 18px;border:0;border-radius:10px;font-weight:bold">← 스테이션 목록</button>`
+    : `<h2>게임 종료!</h2><div style="font-size:46px;font-weight:900">${finalScore}점</div><p>성공 ${egScore}회 · 놓침 ${egMiss}회</p><button onclick="startExtraGame()" style="padding:12px 18px;border:0;border-radius:10px;font-weight:bold">🔄 다시 하기</button><button onclick="closeExtraGame()" style="padding:12px 18px;border:0;border-radius:10px;font-weight:bold">← 스테이션 목록</button>`;
   egResult.style.display='block';
 }
 </script>
