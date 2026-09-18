@@ -69,7 +69,8 @@ function drawSkeleton(canvas,p){
  c.clearRect(0,0,w,h);c.lineWidth=3*devicePixelRatio;c.strokeStyle="#45d483";c.fillStyle="#45d483";
  const pairs=[[11,12],[11,13],[13,15],[12,14],[14,16],[11,23],[12,24],[23,24],[23,25],[25,27],[24,26],[26,28]];
  pairs.forEach(([a,b])=>{if(p[a]&&p[b]){c.beginPath();c.moveTo((1-p[a].x)*w,p[a].y*h);c.lineTo((1-p[b].x)*w,p[b].y*h);c.stroke()}});
- p.forEach((x,i)=>{if(i>10&&x.visibility>.45){c.beginPath();c.arc((1-x.x)*w,x.y*h,5*devicePixelRatio,0,Math.PI*2);c.fill()}});
+ p.forEach((x,i)=>{if(i>10&&x.visibility>.45){c.beginPath();c.fillStyle='#fff';c.arc((1-x.x)*w,x.y*h,5*devicePixelRatio,0,Math.PI*2);c.fill()}});
+  [15,16].forEach(i=>{const x=p[i];if(x&&x.visibility>.55){c.beginPath();c.fillStyle='#20c86b';c.arc((1-x.x)*w,x.y*h,9*devicePixelRatio,0,Math.PI*2);c.fill();c.beginPath();c.fillStyle='#fff';c.arc((1-x.x)*w,x.y*h,3*devicePixelRatio,0,Math.PI*2);c.fill()}});
 }
 function angle(a,b,c){let x=a.x-b.x,y=a.y-b.y,u=c.x-b.x,v=c.y-b.y;return Math.acos(Math.max(-1,Math.min(1,(x*u+y*v)/(Math.hypot(x,y)*Math.hypot(u,v)))))*180/Math.PI}
 function showResult(title,score,icon,detail){
@@ -85,9 +86,31 @@ function reachHTML(kind){
 function placeTarget(){const g=$("reachGame"),t=$("target");if(!g||!t)return;const size=76;t.style.left=Math.max(4,Math.random()*(g.clientWidth-size-8))+"px";t.style.top=Math.max(50,Math.random()*(g.clientHeight-size-58))+"px";t.style.display="block"}
 function startReach(kind){gameScore=0;mode=kind;active=true;$("reachScore").textContent=0;placeTarget();const sec=kind==="bug"?30:45,end=Date.now()+sec*1000;clearInterval(timer);timer=setInterval(()=>{let t=Math.max(0,Math.ceil((end-Date.now())/1000));$("reachTime").textContent=t;if(!t){clearInterval(timer);finish(kind==="bug"?"hand":"reaction",gameScore*(kind==="bug"?3:4),kind==="bug"?"🦟":"⚡",`${gameScore}회 성공했습니다.`)}},150)}
 function handleReach(r){const p=r.poseLandmarks;if(!p||!active||!$("target"))return;const t=$("target"),g=$("reachGame"),gr=g.getBoundingClientRect(),tr=t.getBoundingClientRect(),tx=tr.left+tr.width/2,ty=tr.top+tr.height/2;let hit=false;[p[15],p[16]].forEach(w=>{if(w&&w.visibility>.5){const sx=gr.left+(1-w.x)*gr.width,sy=gr.top+w.y*gr.height;if(Math.hypot(sx-tx,sy-ty)<68)hit=true}});if(hit){gameScore++;$("reachScore").textContent=gameScore;$("liveMsg").textContent="🎯 성공! 다음 목표로!";$("liveMsg").className="live good";placeTarget()}else{$("liveMsg").textContent="🟢 초록색 손목 점을 목표까지 움직이세요.";$("liveMsg").className="live"}}
-function handleJump(r){const p=r.poseLandmarks;if(!p||!active)return;const hip=(p[23].y+p[24].y)/2;if(hipPrev!==null){const rise=hipPrev-hip;if(rise>.065&&!hipLow){hipLow=true;$("liveMsg").textContent="⬆️ 엉덩이 선이 올라갔어요! 점프!";$("liveMsg").className="live good"}if(hipLow&&hip-hipPrev>.025){count++;$("count").textContent=count;hipLow=false;addCloud(count);$("liveMsg").textContent="☁️ 착지! 다시 점프하세요.";}}hipPrev=hip}
+function handleJump(r){
+ const p=r.poseLandmarks;if(!p||!active||!p[23]||!p[24]||p[23].visibility<.55||p[24].visibility<.55)return;
+ const hip=(p[23].y+p[24].y)/2,now=performance.now();
+ if(hipPrev===null){hipPrev=hip;jumpBase=hip;jumpPeak=hip;jumpStart=now;return}
+ if(!hipLow){
+   // 평소 엉덩이 높이를 천천히 따라가되, 짧은 흔들림은 점프로 보지 않음
+   jumpBase=jumpBase*.96+hip*.04;
+   const rise=jumpBase-hip;
+   if(rise>.10 && now-jumpLast>650){
+     hipLow=true;jumpPeak=hip;jumpStart=now;
+     $('liveMsg').textContent='⬆️ 점프 중!';$('liveMsg').className='live good';
+   }
+ }else{
+   jumpPeak=Math.min(jumpPeak,hip);
+   const rise=jumpBase-jumpPeak,fall=hip-jumpPeak;
+   // 충분히 위로 올라간 뒤 내려오는 동작까지 확인해야 1회 인정
+   if(rise>.10 && fall>.065 && now-jumpStart>180){
+     count++;$('count').textContent=count;addCloud(count);jumpLast=now;hipLow=false;jumpBase=hip;
+     $('liveMsg').textContent='☁️ 착지! 다음 구름으로!';$('liveMsg').className='live';
+   }
+ }
+ hipPrev=hip;
+}
 function addCloud(n){const c=document.createElement("div");c.className="cloud";c.textContent="☁️";c.style.left=`${8+(n%7)*13}%`;c.style.bottom=`${10+Math.min(76,n*7)}%`;$("clouds").appendChild(c);$("player").style.bottom=Math.min(80,18+n*7)+"%"}
-function startJump(){count=0;hipPrev=null;hipLow=false;$("clouds").innerHTML="";$("player").style.bottom="18%";active=true;const end=Date.now()+30000;timer=setInterval(()=>{let t=Math.max(0,Math.ceil((end-Date.now())/1000));$("jt").textContent=t;if(!t){clearInterval(timer);finish("jump",count*2,"☁️",`${count}회 점프했습니다. 엉덩이 중심의 상승 움직임으로 판정했습니다.`)}},200)}
+function startJump(){count=0;hipPrev=null;hipLow=false;jumpBase=null;jumpPeak=null;jumpStart=0;jumpLast=0;$('clouds').innerHTML="";$('player').style.bottom="18%";active=true;const end=Date.now()+30000;timer=setInterval(()=>{let t=Math.max(0,Math.ceil((end-Date.now())/1000));$('jt').textContent=t;if(!t){clearInterval(timer);finish("jump",count*2,"☁️",`${count}회 점프했습니다. 충분히 위로 뛰었다가 내려오는 동작만 인정했습니다.`)}},200)}
 function handlePosture(r){const p=r.poseLandmarks;if(!p||!active||!$("postureLive"))return;const s=Math.abs(p[11].y-p[12].y),h=Math.abs(p[23].y-p[24].y);if(s<.035&&h<.045){postureGood++;$("postureLive").textContent="✅ 좋아요! 그대로 유지하세요.";$("postureLive").className="live good"}else if(s>=.035){$("postureLive").textContent="↔️ 어깨를 수평으로 맞춰보세요.";$("postureLive").className="live warn"}else{$("postureLive").textContent="↔️ 골반을 수평으로 맞춰보세요.";$("postureLive").className="live warn"}}
 function startPosture(){postureGood=0;active=true;const end=Date.now()+10000;timer=setInterval(()=>{let t=Math.max(0,Math.ceil((end-Date.now())/1000));$("pt").textContent=t;if(!t){clearInterval(timer);finish("posture",postureGood/60*100,"🧍","기준 자세를 유지한 정도로 점수를 계산했습니다.")}},167)}
 function startDodge(){const area=$("dodgeArea");gameScore=0;active=true;let balls=[];let lastSpawn=0;const end=Date.now()+30*1000;$("hit").textContent=0;$("avoidTime").textContent=30;$("dodgeMsg").textContent="🏐 작은 공이 멀리서 날아옵니다! 몸통을 좌우로 움직여 피하세요.";
@@ -97,6 +120,7 @@ function startDodge(){const area=$("dodgeArea");gameScore=0;active=true;let ball
  timer=setInterval(()=>{const now=performance.now(),dt=now-last;last=now;let t=Math.max(0,Math.ceil((end-Date.now())/1000));$("avoidTime").textContent=t;const p=latestPose;if(p&&p[23]&&p[24]){const hx=(p[23].x+p[24].x)/2,hy=(p[23].y+p[24].y)/2;for(let i=balls.length-1;i>=0;i--){let b=balls[i];b.t+=dt;let q=Math.min(1,b.t/b.dur),e=q*q*(3-2*q);let x=b.sx+(b.tx-b.sx)*e;let y=8+(58-8)*e;b.el.style.left=x+"%";b.el.style.top=y+"%";b.el.style.transform=`scale(${.35+1.15*e})`;if(q>=.78&&!b.hit){b.hit=true;const dx=Math.abs(b.tx/100-hx),dy=Math.abs(.58-hy);if(dx<.12&&dy<.18){gameScore++;$("hit").textContent=gameScore;b.el.style.filter="grayscale(1)"}}if(q>=1){b.el.remove();balls.splice(i,1)}}}
  if(!t){clearInterval(timer);clearInterval(spawnTimer);balls.forEach(b=>b.el.remove());finish("dodge",Math.max(0,100-gameScore*12),"🏐",`앞에서 날아온 공에 맞은 횟수 ${gameScore}회 · 몸통을 좌우로 움직여 피했습니다.`)}},50);
 }
+let jumpBase=null,jumpPeak=null,jumpStart=0,jumpLast=0;
 let latestPose=null;
 function handleDodge(r){latestPose=r.poseLandmarks;const p=latestPose;if(p&&$("dodgeMsg")){$("dodgeMsg").textContent=active?"🏃 공이 오면 몸통을 좌우로 이동하세요!":"시작 버튼을 눌러주세요."}}
 function startBasket(){gameScore=0;active=true;$("made").textContent=0;$("shot").textContent=0;reachPrev=null;let basketCooldown=0;const end=Date.now()+30000;$("liveMsg").textContent="🏀 오른쪽 위 골대를 보고, 한 손을 골대 방향으로 던져보세요!";timer=setInterval(()=>{let t=Math.max(0,Math.ceil((end-Date.now())/1000));$("basketTime").textContent=t;if(!t){clearInterval(timer);finish("basket",Math.min(100,gameScore*20),"🏀",`${gameScore}골 성공 · 화면의 골대를 향해 던지는 동작으로 판정했습니다.`)}},150);window._basketCooldown=()=>basketCooldown;window._setBasketCooldown=v=>basketCooldown=v}
