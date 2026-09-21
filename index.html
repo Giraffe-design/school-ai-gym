@@ -329,7 +329,7 @@ function startExtraGame(){
   egResult.style.display='none';
   requestAnimationFrame(egLoop);
 }
-function drawExtraBasketball(ctx,x,y,r){ctx.save();ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fillStyle="#f28b31";ctx.fill();ctx.lineWidth=2.5;ctx.strokeStyle="#171717";ctx.stroke();ctx.beginPath();ctx.arc(x,y,r*.52,-Math.PI/2,Math.PI/2);ctx.stroke();ctx.beginPath();ctx.arc(x,y,r*.52,Math.PI/2,Math.PI*1.5);ctx.stroke();ctx.beginPath();ctx.moveTo(x-r,y);ctx.quadraticCurveTo(x,y-r*.35,x+r,y);ctx.stroke();ctx.beginPath();ctx.moveTo(x-r,y);ctx.quadraticCurveTo(x,y+r*.35,x+r,y);ctx.stroke();ctx.restore()}
+function drawExtraBasketball(ctx,x,y,r){ctx.save();ctx.font=`${Math.round(r*2.35)}px "Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif`;ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText("🏀",x,y);ctx.restore()}
 function egLoop(){
   if(!egRunning)return;
   const left=Math.max(0,Math.ceil((egEnd-Date.now())/1000));
@@ -408,7 +408,7 @@ function drawHitBallGame(){
   egObjs.forEach(o=>{
     if(o.done)return;
     o.x+=o.dir*o.speed;
-    drawExtraBasketball(egCtx,o.x*egCanvas.width,o.y*egCanvas.height,27);
+    drawExtraBasketball(egCtx,o.x*egCanvas.width,o.y*egCanvas.height,34);
     if((o.dir>0&&o.x>=.50)||(o.dir<0&&o.x<=.50)){
       o.done=true;o.hit=false;egMiss++;egScore=Math.max(0,egScore-10);
     }
