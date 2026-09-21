@@ -174,10 +174,29 @@ function startRope(){
  };
  requestAnimationFrame(draw);
 }
-function handleHitBall(r){latestPose=r.poseLandmarks;}
+function handleHitBall(r){
+  latestPose=r.poseLandmarks;
+  const p=latestPose;
+  if(!p)return;
+  const now=performance.now();
+  const w=$('overlay')?.clientWidth||640,h=$('overlay')?.clientHeight||480;
+  hitBallHands.forEach((hand,idx)=>{
+    const lm=p[15+idx*1];
+    if(!lm||lm.visibility<.35)return;
+    const x=(1-lm.x)*w,y=lm.y*h;
+    const prev=hand.prev;
+    if(prev){
+      const dt=Math.max(16,now-prev.t);
+      hand.vx=(x-prev.x)/dt; hand.vy=(y-prev.y)/dt;
+      hand.speed=Math.hypot(hand.vx,hand.vy);
+    }
+    hand.prev={x,y,t:now};
+  });
+}
 let hitBallState=null,hitBallRaf=null;
+const hitBallHands=[{prev:null,vx:0,vy:0,speed:0},{prev:null,vx:0,vy:0,speed:0}];
 function startHitBall(){
- gameScore=100;latestPose=null;active=true;hitBallState=null;
+ gameScore=100;latestPose=null;active=true;hitBallState=null;hitBallHands.forEach(h=>{h.prev=null;h.vx=0;h.vy=0;h.speed=0});
  $('hitballScore').textContent='100';$('hitballMiss').textContent='0';$('hitballTime').textContent='30';
  const started=performance.now(),end=Date.now()+30000;
  function spawn(now){
@@ -207,31 +226,21 @@ function startHitBall(){
        const sy=cy+Math.sin(b.angle)*Math.max(w,h)*.68;
        b.x=sx+(cx-sx)*q;b.y=sy+(cy-sy)*q;
        const rr=Math.max(34,Math.min(w,h)*.075);
-       // 농구공 자체를 그립니다: 별도의 노란 원/배경 없이 공 모양과 검은 홈만 표시
+       // 기존에 쓰던 농구공 이모지 자체만 표시합니다. 바깥 원/테두리는 없습니다.
        ctx.save();
-       ctx.beginPath();ctx.arc(b.x,b.y,rr,0,Math.PI*2);ctx.fillStyle='#f28b31';ctx.fill();ctx.lineWidth=3;ctx.strokeStyle='#171717';ctx.stroke();
-       ctx.beginPath();ctx.arc(b.x,b.y,rr*.52,-Math.PI/2,Math.PI/2);ctx.strokeStyle='#171717';ctx.lineWidth=2.5;ctx.stroke();
-       ctx.beginPath();ctx.arc(b.x,b.y,rr*.52,Math.PI/2,Math.PI*1.5);ctx.stroke();
-       ctx.beginPath();ctx.moveTo(b.x-rr,b.y);ctx.quadraticCurveTo(b.x,b.y-rr*.35,b.x+rr,b.y);ctx.stroke();
-       ctx.beginPath();ctx.moveTo(b.x-rr,b.y);ctx.quadraticCurveTo(b.x,b.y+rr*.35,b.x+rr,b.y);ctx.stroke();
+       ctx.font=`${Math.round(rr*2.05)}px Arial`;
+       ctx.textAlign='center';ctx.textBaseline='middle';
+       ctx.fillText('🏀',b.x,b.y);
        ctx.restore();
-       let hit=false;const p=latestPose;
-       if(p){
-         // 손목뿐 아니라 손목-팔꿈치 사이도 넓게 허용해 인식 지연/흔들림을 보완
-         for(const wi of [15,16]){
-           if(!p[wi]||p[wi].visibility<.35)continue;
-           const qx=(1-p[wi].x)*w,qy=p[wi].y*h;
-           if(Math.hypot(qx-b.x,qy-b.y)<Math.max(115,rr*4.5)){hit=true;break;}
-         }
-         if(!hit){
-           for(const [ei,wi] of [[13,15],[14,16]]){
-             if(!p[ei]||!p[wi])continue;
-             const ex=(1-p[ei].x)*w,ey=p[ei].y*h,wx=(1-p[wi].x)*w,wy=p[wi].y*h;
-             const dist=Math.hypot(wx-b.x,wy-b.y);
-             const edist=Math.hypot(ex-b.x,ey-b.y);
-             if(Math.min(dist,edist)<135){hit=true;break;}
-           }
-         }
+       let hit=false;
+       // 단순히 손이 공 근처에 있는 것만으로는 성공하지 않습니다.
+       // ① 공과 손이 가까워야 하고 ② 손이 공을 향해 빠르게 움직여야 합니다.
+       for(const hand of hitBallHands){
+         if(!hand.prev||hand.speed<0.22)continue;
+         const wx=hand.prev.x,wy=hand.prev.y;
+         const dx=b.x-wx,dy=b.y-wy,dist=Math.hypot(dx,dy)||1;
+         const toward=(hand.vx*dx+hand.vy*dy)/(hand.speed*dist);
+         if(dist<Math.max(58,rr*1.25) && toward>0.55){hit=true;break;}
        }
        if(hit){
          b.hit=true;hitBallState=null;
