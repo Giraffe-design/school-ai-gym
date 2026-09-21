@@ -97,7 +97,7 @@ function startSquat(){count=0;phase="up";active=true;const end=Date.now()+45000;
 function reachHTML(kind){
  const bug=kind==="bug";
  const reactionTargets=bug?"":`<div class="reactionTargets">${[0,1,2,3].map(i=>`<div class="target reactionTarget" data-ri="${i}"><span>${i+1}</span></div>`).join("")}</div>`;
- return `<div class="panel"><div class="station-layout"><div class="motion-game" id="reachGame"><video id="video" autoplay playsinline></video><canvas id="overlay" class="game-overlay"></canvas><div class="targetLabel">${bug?"🦟 모기를 손바닥으로 잡아!":"🟢 꺼졌다가 켜지는 불빛을 손으로 때려!"}</div>${bug?`<div id="target" class="target purple"><span>🦟</span></div>`:reactionTargets}</div><div class="guide"><h3>HOW TO PLAY</h3><div class="ruleOne">${bug?"초록 점으로<br>모기를 잡아!":"불이 켜지면<br>손으로 때려!"}</div><div class="guideHint">${bug?"초록 점은 손바닥 가운데를 따라갑니다.":"불빛 4개가 동시에 꺼져 있다가 확 켜집니다. 켜진 불빛을 손으로 빠르게 때리세요."}</div><div id="liveMsg" class="live">시작 버튼을 누르면 시작!</div><div class="stat"><div class="statbox">성공<div class="num" id="reachScore">0</div></div><div class="statbox">시간<div class="num" id="reachTime">${bug?30:45}</div></div></div><button class="startBtn" id="startReachBtn">시작하기</button></div></div></div>`}
+ return `<div class="panel"><div class="station-layout"><div class="motion-game" id="reachGame"><video id="video" autoplay playsinline></video><canvas id="overlay" class="game-overlay"></canvas><div class="targetLabel">${bug?"🦟 모기를 손바닥으로 잡아!":"1부터 순서대로 손바닥으로 눌러!"}</div>${bug?`<div id="target" class="target purple"><span>🦟</span></div>`:reactionTargets}</div><div class="guide"><h3>HOW TO PLAY</h3><div class="ruleOne">${bug?"초록 점으로<br>모기를 잡아!":"1부터 순서대로<br>손바닥으로 눌러!"}</div><div class="guideHint">${bug?"초록 점은 손바닥 가운데를 따라갑니다.":"1을 맞히면 5가 새 위치에 나타납니다. 손바닥으로 숫자를 순서대로 눌러주세요."}</div><div id="liveMsg" class="live">시작 버튼을 누르면 시작!</div><div class="stat"><div class="statbox">성공<div class="num" id="reachScore">0</div></div><div class="statbox">시간<div class="num" id="reachTime">${bug?30:45}</div></div></div><button class="startBtn" id="startReachBtn">시작하기</button></div></div></div>`}
 function placeTarget(){
  const g=$("reachGame"); if(!g)return;
  const pad=86;
@@ -168,7 +168,17 @@ function handleReach(r){
  if(!reactionLightOn)return;
  const targets=[...g.querySelectorAll(".reactionTarget.on")];
  const handPts=[];
- [15,16,19,20,17,18,13,14].forEach(i=>{const w=p[i];if(w&&w.visibility>.3)handPts.push({x:gr.left+(1-w.x)*gr.width,y:gr.top+w.y*gr.height});});
+ // 손바닥 중심을 넓게 잡아 실제 손바닥이 원에 닿으면 인식
+ [[15,17,19],[16,18,20]].forEach(ids=>{
+   const pts=ids.map(i=>p[i]).filter(w=>w&&w.visibility>.22);
+   if(pts.length){
+     const cx=pts.reduce((a,w)=>a+(1-w.x),0)/pts.length;
+     const cy=pts.reduce((a,w)=>a+w.y,0)/pts.length;
+     handPts.push({x:gr.left+cx*gr.width,y:gr.top+cy*gr.height});
+   }
+ });
+ // 손목·손가락 관절도 보조 판정점으로 사용
+ [15,16,17,18,19,20].forEach(i=>{const w=p[i];if(w&&w.visibility>.22)handPts.push({x:gr.left+(1-w.x)*gr.width,y:gr.top+w.y*gr.height});});
  const target=targets.find(t=>Number(t.dataset.num)===reactionNextNumber);
  if(!target)return;
  const tr=target.getBoundingClientRect(),tx=tr.left+tr.width/2,ty=tr.top+tr.height/2;
@@ -176,12 +186,11 @@ function handleReach(r){
    target.classList.remove("on");target.classList.add("hit");
    gameScore++;$("reachScore").textContent=gameScore;
    reactionNextNumber++;
-   const nextNum=reactionNextNumber;
-   // 맞힌 자리에 새 숫자를 두지 않고, 다른 랜덤 위치에 새 원을 생성
-   const free=[...g.querySelectorAll(".reactionTarget")].find(t=>!t.classList.contains("on")&&!t.classList.contains("hit"));
+   // 맞힌 숫자는 사라지고, 기존에 보이지 않던 다음 숫자(예: 1→5, 2→6)가 나타남
+   const newNum=reactionNextNumber+3;
    setTimeout(()=>{
      target.classList.remove("hit");
-     target.dataset.num=String(nextNum);target.querySelector("span").textContent=String(nextNum);
+     target.dataset.num=String(newNum);target.querySelector("span").textContent=String(newNum);
      let sx=.10+Math.random()*.80,sy=.16+Math.random()*.68,tries=0;
      while(tries++<80){
        const tooClose=[...g.querySelectorAll(".reactionTarget.on")].some(q=>{const qr=q.getBoundingClientRect(),cx=gr.left+sx*gr.width,cy=gr.top+sy*gr.height;return Math.hypot(cx-(qr.left+qr.width/2),cy-(qr.top+qr.height/2))<105});
@@ -190,7 +199,7 @@ function handleReach(r){
      }
      target.style.left=(sx*g.clientWidth-38)+"px";target.style.top=(sy*g.clientHeight-38)+"px";target.classList.add("on");
    },120);
-   $("liveMsg").textContent=`🎯 ${nextNum}을 찾아서 때리세요!`;$("liveMsg").className="live good";
+   $("liveMsg").textContent=`🎯 ${reactionNextNumber}을 찾아서 손바닥으로 눌러요!`;$("liveMsg").className="live good";
  }else{
    $("liveMsg").textContent=`🔢 ${reactionNextNumber}부터 순서대로 때리세요!`;$("liveMsg").className="live warn";
  }
