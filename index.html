@@ -107,7 +107,15 @@ function placeTarget(){
  const t=$("target");
  if(t){t.style.left=x+"px";t.style.top=y+"px";return}
  const ts=[...g.querySelectorAll(".reactionTarget")];
- const spots=[[.22,.30],[.72,.28],[.30,.68],[.72,.67]];
+ const spots=[];
+ for(let i=0;i<ts.length;i++){
+   let sx,sy,ok=false,tries=0;
+   while(!ok&&tries++<80){
+     sx=.12+Math.random()*.76; sy=.18+Math.random()*.64; ok=true;
+     for(const q of spots){ if(Math.hypot(sx-q[0],sy-q[1])<.24){ok=false;break;} }
+   }
+   spots.push([sx,sy]);
+ }
  ts.forEach((el,i)=>{const [sx,sy]=spots[i];el.style.left=(g.clientWidth*sx-38)+"px";el.style.top=(g.clientHeight*sy-38)+"px";el.classList.remove("hit","on");});
 }
 let reactionLightOn=false,reactionNextOn=0,reactionOnAt=0;
@@ -142,7 +150,9 @@ function handleReach(r){const p=r.poseLandmarks;if(!p||!active||!$("target"))ret
   targets.forEach(tg=>{
     const tr=tg.getBoundingClientRect(),tx2=tr.left+tr.width/2,ty2=tr.top+tr.height/2;
     if(!tg.classList.contains("hit")&&pts.some(w=>Math.hypot(w.x-tx2,w.y-ty2)<78)){
-      tg.classList.add("hit");gameScore++;hitAny=true;
+      tg.classList.remove("on");tg.classList.add("hit");
+      setTimeout(()=>tg.classList.remove("hit"),180);
+      gameScore++;hitAny=true;
       $("reachScore").textContent=gameScore;
     }
   });
