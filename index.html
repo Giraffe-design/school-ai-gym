@@ -1,196 +1,1030 @@
 <!doctype html>
 <html lang="ko">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>우리 학교 AI 체육관</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>우리학교 AI 체육관</title>
 <style>
-*{box-sizing:border-box}body{margin:0;font-family:Arial,"Noto Sans KR",sans-serif;background:#f3f6fb;color:#172033}
-header{background:#172033;color:#fff;padding:16px 28px;display:flex;justify-content:space-between;align-items:center}
-h1{margin:0;font-size:29px}.sub{margin-top:5px;color:#c8d0df}.scoreTop{font-size:19px;font-weight:800}
-main{max-width:1180px;margin:auto;padding:24px}.hero{background:linear-gradient(135deg,#334b75,#58709a);color:#fff;border-radius:25px;padding:30px;margin-bottom:20px}
-.hero h2{font-size:34px;margin:7px 0}.bigscore{font-size:68px;font-weight:900}.progress{display:flex;gap:7px;margin-top:15px}.dot{width:14px;height:14px;border-radius:50%;background:#c8d0df}.dot.done{background:#fff}
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:17px}.card{background:#fff;border-radius:21px;padding:22px;min-height:220px;box-shadow:0 7px 25px #17203312;cursor:pointer;user-select:none;transition:.15s}
-.card:hover{transform:translateY(-3px)}.card:active{transform:scale(.985)}.n{font-weight:800;color:#8992a2}.emoji{font-size:45px;margin:18px 0 9px}.card h3{font-size:20px;margin:0 0 9px}.card p{color:#687386;line-height:1.5;margin:0}
-.panel{background:#fff;border-radius:20px;padding:20px;margin-bottom:15px;box-shadow:0 7px 25px #17203312}
-button{border:0;border-radius:12px;padding:12px 17px;background:#172033;color:#fff;font-weight:800;cursor:pointer;margin:4px}button.light{background:#e9edf4;color:#172033}
-.hidden{display:none!important}.station-layout{display:grid;grid-template-columns:minmax(0,2fr) minmax(270px,1fr);gap:16px}
-.video-wrap{position:relative;background:#101722;border-radius:18px;overflow:hidden;min-height:300px}.video-wrap video{width:100%;display:block;max-height:520px;object-fit:cover;transform:scaleX(-1)}
-.overlay{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:5}.guide{background:#f0f4f9;border-radius:16px;padding:17px}.guide h3{margin:0 0 12px}
-.guide-row{display:flex;gap:10px;align-items:flex-start;margin:10px 0;line-height:1.45}.badge{min-width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:#172033;color:#fff;font-weight:800}
-.live{margin-top:12px;border-radius:14px;padding:13px;background:#eef3f8;font-weight:800}.live.good{background:#e8f5ed}.live.warn{background:#fff4dd}
-.stat{display:flex;gap:10px;flex-wrap:wrap;margin-top:13px}.statbox{background:#f0f3f8;border-radius:13px;padding:11px 15px;min-width:120px}.num{font-size:32px;font-weight:900}
-.motion-game{position:relative;background:#dfeef8;border-radius:18px;overflow:hidden;min-height:430px}.motion-game video{width:100%;display:block;transform:scaleX(-1)}
-.game-overlay{position:absolute;inset:0;z-index:6;pointer-events:none}.target{position:absolute;width:76px;height:76px;border-radius:50%;border:5px solid #fff;box-shadow:0 5px 18px #0005;z-index:10;display:block!important;pointer-events:none}
-.target.red{background:#ef536d}.target.purple{background:#7b61ff}.target span{font-size:28px;position:absolute;inset:0;display:grid;place-items:center}
-.targetLabel{position:absolute;top:12px;left:12px;background:#172033dd;color:#fff;border-radius:10px;padding:8px 11px;font-weight:800;z-index:12}
-.result{text-align:center;padding:30px 10px}.resultScore{font-size:72px;font-weight:900;margin:8px 0}.resultIcon{font-size:60px}.resultActions{margin-top:18px}
-@media(max-width:900px){.grid{grid-template-columns:repeat(2,1fr)}.station-layout{grid-template-columns:1fr}}
-@media(max-width:600px){main{padding:12px}.grid{grid-template-columns:1fr}.hero h2{font-size:27px}.bigscore{font-size:55px}}
+*{box-sizing:border-box}
+:root{--ink:#172033;--muted:#667085;--line:#e6eaf0;--bg:#f5f7fb;--card:#fff;--accent:#3b82f6;--good:#16a34a;--bad:#ef4444}
+body{margin:0;font-family:Arial,"Noto Sans KR",sans-serif;color:var(--ink);background:linear-gradient(135deg,#f7f9fc,#edf4ff);min-height:100vh}
+button{font:inherit;cursor:pointer}
+.hidden{display:none!important}
+.app{max-width:1180px;margin:0 auto;padding:24px}
+.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.brand{font-weight:900;font-size:22px}.brand small{display:block;color:#7a8495;font-size:11px;letter-spacing:1.5px;margin-top:3px}
+.badge{padding:8px 12px;background:#fff;border:1px solid var(--line);border-radius:999px;font-weight:800;font-size:13px}
+.hero{background:var(--ink);color:white;border-radius:28px;padding:30px;display:flex;justify-content:space-between;gap:20px;align-items:center;box-shadow:0 18px 45px #17203322}
+.hero h1{font-size:38px;margin:4px 0 8px}.hero p{margin:0;color:#cbd5e1}.heroScore{text-align:center;min-width:180px}.heroScore strong{font-size:68px;line-height:1}.heroScore span{display:block;color:#cbd5e1;font-weight:800}
+.progress{height:8px;background:#ffffff22;border-radius:9px;margin-top:20px;overflow:hidden}.progress i{display:block;height:100%;background:#60a5fa;width:0;transition:.3s}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:20px;min-height:205px;display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 8px 25px #1720330a;transition:.2s}.card:hover{transform:translateY(-3px);box-shadow:0 14px 30px #17203316}
+.card.done{border-color:#86efac}.num{font-size:12px;font-weight:900;color:#94a3b8;letter-spacing:1px}.icon{font-size:42px;margin:12px 0 4px}.card h3{margin:0 0 5px;font-size:21px}.card p{margin:0;color:var(--muted);font-size:13px}.card button{margin-top:14px;border:0;background:#eef4ff;color:#2563eb;border-radius:12px;padding:10px;font-weight:900}
+.card.done button{background:#ecfdf3;color:#15803d}
+.footerNote{text-align:center;color:#8792a3;font-size:12px;margin:20px}
+.screen{background:var(--card);border:1px solid var(--line);border-radius:28px;padding:22px;box-shadow:0 12px 35px #17203310}
+.stationHead{display:flex;align-items:center;gap:12px;margin-bottom:18px}.back{border:0;background:#eef2f7;border-radius:12px;padding:10px 14px;font-weight:900}.stationHead h2{margin:0;font-size:28px}.stationHead .tag{margin-left:auto;color:#64748b;font-size:12px;font-weight:900}
+.gameLayout{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:18px}
+.playArea{position:relative;background:#eaf2f8;border-radius:22px;overflow:hidden;min-height:500px}
+.side{border:1px solid var(--line);border-radius:20px;padding:20px;background:#fff}.side h4{margin:0 0 10px;color:#64748b;letter-spacing:1px}.rule{font-size:26px;font-weight:900;line-height:1.2;margin:12px 0 18px}.hint{font-size:13px;color:#667085;line-height:1.5}.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:18px 0}.stat{border:1px solid var(--line);border-radius:14px;padding:12px;text-align:center}.stat b{display:block;font-size:26px}.start{width:100%;border:0;border-radius:14px;background:var(--ink);color:#fff;padding:14px;font-weight:900}.start.running{background:#dbeafe;color:#1d4ed8}.live{font-weight:800;margin:12px 0;min-height:20px}.good{color:var(--good)}.warn{color:#b45309}.bad{color:var(--bad)}
+video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1);display:block}.camWrap{position:absolute;inset:0}.overlay{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.guideLine{position:absolute;inset:7%;border:2px dashed #fff9;border-radius:20px;pointer-events:none}.guideText{position:absolute;left:16px;top:16px;background:#172033cc;color:#fff;padding:9px 12px;border-radius:10px;font-weight:900}
+.result{position:absolute;inset:0;background:#172033eF;color:#fff;display:flex;align-items:center;justify-content:center;text-align:center;z-index:20}.resultBox{background:#fff;color:var(--ink);border-radius:26px;padding:30px;min-width:300px}.resultBox .big{font-size:70px;font-weight:900}.resultBox button{border:0;background:var(--ink);color:#fff;padding:12px 20px;border-radius:12px;font-weight:900;margin-top:12px}
+.target{position:absolute;width:72px;height:72px;border-radius:50%;display:grid;place-items:center;font-size:25px;font-weight:900;border:5px solid #fff;box-shadow:0 7px 20px #0004;user-select:none}
+.reaction{background:#22c55e}.numberTarget{background:#3b82f6;color:#fff}.mole{background:#8b5cf6}
+.target.fade{animation:pop .16s ease forwards}@keyframes pop{to{transform:scale(.1);opacity:0}}
+.moleBoard{position:absolute;inset:0;padding:35px;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:18px;background:#b7df9b}
+.hole{position:relative;border:0;border-radius:50%;background:#654321;box-shadow:inset 0 12px 0 #3b2414;overflow:hidden}
+.moleFace{position:absolute;left:50%;bottom:-12px;transform:translateX(-50%);width:105px;height:88px;background:#a66a3f;border-radius:50% 50% 38% 38%;display:grid;place-items:center;font-size:34px;transition:bottom .12s ease,transform .12s ease;z-index:2;box-shadow:0 -5px 12px #0003}
+.hole.active .moleFace{bottom:3px;transform:translateX(-50%) scale(1.03)}
+.jack{position:absolute;inset:0;display:grid;place-items:center}.jack .person{font-size:110px}.flash{position:absolute;inset:0;background:#22c55e33;opacity:0}
+.board{position:absolute;inset:0;background:#173f68;padding:26px;display:flex;flex-direction:column}.chalk{background:#e8edf0;border-radius:12px;flex:1;position:relative;overflow:hidden}.chalkGrid{position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent 0 48px,#c5cdd2 49px 50px),repeating-linear-gradient(90deg,transparent 0 48px,#c5cdd2 49px 50px);opacity:.45}.word{position:absolute;font-size:34px;font-weight:900;color:#23364d;user-select:none}.eraser{position:absolute;width:74px;height:74px;border-radius:16px;background:#fff;border:5px solid #dbe3ea;box-shadow:0 7px 15px #0003;display:none;pointer-events:none}.eraser.on{display:block}
+.calc{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;background:linear-gradient(135deg,#eff6ff,#f8fafc)}.equation{font-size:58px;font-weight:900}.answers{display:grid;grid-template-columns:repeat(2,180px);gap:12px}.answers button{border:0;background:#fff;border:2px solid #dbe3ee;border-radius:16px;padding:18px;font-size:25px;font-weight:900}.answers button:hover{border-color:#60a5fa;background:#eff6ff}
+.daily{background:var(--ink);color:#fff;border-radius:28px;padding:32px;text-align:center}.daily h2{font-size:32px;margin:0}.dailyScore{font-size:92px;font-weight:900;margin:12px}.breakdown{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:20px}.break{background:#ffffff12;border-radius:14px;padding:12px}.break b{display:block;font-size:25px}.resultBtns{display:flex;gap:10px;justify-content:center;margin-top:22px}.resultBtns button{border:0;border-radius:12px;padding:13px 20px;font-weight:900}.primary{background:#fff;color:var(--ink)}.secondary{background:#ffffff18;color:#fff}
+@media(max-width:900px){.grid{grid-template-columns:repeat(2,1fr)}.gameLayout{grid-template-columns:1fr}.side{order:-1}.heroScore{min-width:120px}.breakdown{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.app{padding:12px}.grid{grid-template-columns:1fr}.hero{padding:22px}.hero h1{font-size:29px}.heroScore strong{font-size:52px}.answers{grid-template-columns:repeat(2,1fr);width:90%}.answers button{width:100%}.equation{font-size:40px}}
 </style>
 </head>
 <body>
-<header><div><h1>🏃 우리 학교 AI 체육관</h1><div class="sub">5 STATION · 체육수업 모션 챌린지</div></div><div class="scoreTop">오늘 <span id="topScore">0</span>점</div></header>
-<main>
+<div class="app">
+<header class="top"><div class="brand">우리학교 AI 체육관<small>AI MOTION TRAINING CENTER</small></div><div class="badge" id="todayBadge"></div></header>
+
 <section id="home">
-<div class="hero"><div style="opacity:.75;font-weight:800">TODAY'S PE CHALLENGE</div><h2>오늘의 체육 점수</h2><div class="bigscore" id="dailyScore">0</div><div id="scoreText">5개 스테이션에 도전해 보세요!</div><div class="progress" id="progress"></div></div>
-<div class="grid">
-<div class="card" data-station="1"><div class="n">STATION 1</div><div class="emoji">🏋️</div><h3>스쿼트 챌린지</h3><p>무릎 각도와 몸의 움직임으로 스쿼트를 측정합니다.</p></div>
-<div class="card" data-station="2"><div class="n">STATION 2</div><div class="emoji">⚡</div><h3>반응속도 레이스</h3><p>목표까지 손을 직접 움직여 빠르게 반응합니다.</p></div>
-<div class="card" data-station="4"><div class="n">STATION 3</div><div class="emoji">🦟</div><h3>모기 잡기</h3><p>손을 움직여 화면 속 모기를 잡습니다.</p></div>
-<div class="card" data-station="5"><div class="n">STATION 4</div><div class="emoji">🧍</div><h3>AI 자세 체크</h3><p>어깨와 골반을 맞추고 자세를 유지합니다.</p></div>
-<div class="card" data-station="7"><div class="n">STATION 5</div><div class="emoji">🥎</div><h3>양손 공 쳐내기</h3><p>사방에서 날아오는 공을 손으로 쳐내세요. 몸에 닿으면 점수가 내려갑니다.</p></div>
+<div class="hero">
+<div>
+<div style="font-weight:900;color:#93c5fd">TODAY'S PE CHALLENGE</div>
+<h1>오늘의 체육 점수</h1>
+<p id="heroText">7개 게임에 도전하고 나만의 체육 점수를 만들어 보세요.</p>
+<div class="progress"><i id="bar"></i></div>
 </div>
-<div class="panel" style="margin-top:17px"><h2>📊 나의 기록</h2><div id="records"></div></div>
-<div class="panel"><button id="resetBtn">오늘 기록 초기화</button></div>
+<div class="heroScore"><strong id="homeScore">0</strong><span>POINT</span></div>
+</div>
+
+<div class="grid" id="cards"></div>
+<div class="footerNote">게임을 끝내면 점수가 자동으로 저장됩니다. 7개를 모두 완료하면 오늘의 체육 점수를 확인할 수 있어요.</div>
 </section>
-<section id="station" class="hidden"><div class="panel"><button class="light" id="homeBtn">← 스테이션 목록</button><span id="title"></span></div><div id="stationBody"></div></section>
-</main>
+
+<section id="station" class="hidden">
+<div class="screen">
+<div class="stationHead">
+<button class="back" id="back">← 목록</button>
+<h2 id="stationTitle"></h2>
+<span class="tag" id="stationTag"></span>
+</div>
+<div id="body"></div>
+</div>
+</section>
+
+<section id="daily" class="hidden"></section>
+</div>
+
 <script>
-const keys=["squat","reaction","hand","posture","hitball"];
-const names={squat:"스쿼트",reaction:"반응속도",hand:"모기 잡기",posture:"자세 체크",hitball:"공 쳐내기"};
-const state=JSON.parse(localStorage.getItem("gym5")||"{}");
-let stream=null,pose=null,raf=null,timer=null,active=false,currentStation=0;
-let count=0,phase="up",gameScore=0,mode=null,postureGood=0,reactionNext=1;
-function $(id){return document.getElementById(id)}
-function save(){localStorage.setItem("gym5",JSON.stringify(state));render()}
-function calc(){return Math.round(keys.reduce((sum,k)=>sum+(typeof state[k]==="number"?state[k]:0),0)/5)}
-function render(){
- const score=calc(),done=keys.filter(k=>typeof state[k]==="number").length;
- $("dailyScore").textContent=score;$("topScore").textContent=score;
- $("scoreText").textContent=done===5?"🎉 5개 스테이션 완료! 오늘의 체육 챌린지 성공!":`${done}/5 스테이션 완료 · 다음 스테이션에 도전하세요!`;
- $("progress").innerHTML=keys.map(k=>`<div class="dot ${typeof state[k]==="number"?"done":""}"></div>`).join("");
- $("records").innerHTML=keys.map((k,i)=>`<div style="display:inline-block;margin:4px;background:#f0f3f8;border-radius:13px;padding:10px 14px">${i+1}. ${names[k]} <b style="font-size:21px">${state[k]??"-"}</b></div>`).join("");
+const GAMES=[
+{id:"squat",name:"스쿼트",icon:"🏋️",desc:"정확한 자세로 스쿼트",time:45},
+{id:"jacks",name:"팔벌려뛰기",icon:"🤸",desc:"팔과 다리를 크게 벌려!",time:30},
+{id:"mole",name:"두더지잡기",icon:"🔨",desc:"나오는 두더지를 빠르게!",time:30},
+{id:"reaction",name:"반응속도 45초",icon:"⚡",desc:"숫자를 순서대로 터치!",time:45},
+{id:"hunter",name:"넘버헌터",icon:"🔢",desc:"숨어 있는 숫자를 찾아라!",time:30},
+{id:"erase",name:"칠판 지우기",icon:"🧽",desc:"칠판의 글씨를 빠르게 지워!",time:30},
+{id:"calc",name:"계산 눈치 게임",icon:"🧠",desc:"정답을 빠르게 골라!",time:30}
+];
+
+const scores=JSON.parse(localStorage.getItem("schoolGymScores7")||"{}");
+let timer=null,active=false,current=null,raf=null,stream=null,pose=null,gameData={};
+
+const $=id=>document.getElementById(id);
+
+function save(){
+localStorage.setItem("schoolGymScores7",JSON.stringify(scores));
 }
-async function loadScript(src){return new Promise((resolve,reject)=>{if(document.querySelector(`script[src="${src}"]`))return resolve();const s=document.createElement("script");s.src=src;s.onload=resolve;s.onerror=reject;document.head.appendChild(s)})}
-function stopAll(){active=false;clearInterval(timer);timer=null;if(raf)cancelAnimationFrame(raf);raf=null;if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}pose=null}
-async function startCamera(video,drawMode){
- try{
-  await loadScript("https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js");
-  stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:"user"},audio:false});video.srcObject=stream;await video.play();
-  pose=new Pose({locateFile:f=>`https://cdn.jsdelivr.net/npm/@mediapipe/pose/${f}`});
-  pose.setOptions({modelComplexity:(drawMode==="hitball"?0:1),smoothLandmarks:(drawMode==="hitball"?false:true),minDetectionConfidence:(drawMode==="hitball"?.45:.55),minTrackingConfidence:(drawMode==="hitball"?.45:.55)});
-  pose.onResults(r=>{drawSkeleton($("overlay"),r.poseLandmarks);if(drawMode==="squat")handleSquat(r);if(drawMode==="reach"||drawMode==="bug")handleReach(r);if(drawMode==="posture")handlePosture(r);if(drawMode==="hitball")handleHitBall(r)});
-  active=true;const send=async()=>{if(!active||!pose)return;try{await pose.send({image:video})}catch(e){}raf=requestAnimationFrame(send)};send();
- }catch(e){const m=$("liveMsg")||$("postureLive");if(m){m.className="live warn";m.textContent="카메라 권한을 허용해야 활동할 수 있어요."}}
+
+function average(){
+let a=GAMES.map(g=>scores[g.id]).filter(v=>typeof v==="number");
+return a.length?Math.round(a.reduce((x,y)=>x+y,0)/a.length):0;
 }
-function drawSkeleton(canvas,p){
- if(!canvas||!p)return;const c=canvas.getContext("2d"),w=canvas.width=canvas.clientWidth*devicePixelRatio,h=canvas.height=canvas.clientHeight*devicePixelRatio;
- c.clearRect(0,0,w,h);c.lineWidth=3*devicePixelRatio;c.strokeStyle="#45d483";c.fillStyle="#45d483";
- const pairs=[[11,12],[11,13],[13,15],[12,14],[14,16],[11,23],[12,24],[23,24],[23,25],[25,27],[24,26],[26,28]];
- pairs.forEach(([a,b])=>{if(p[a]&&p[b]){c.beginPath();c.moveTo((1-p[a].x)*w,p[a].y*h);c.lineTo((1-p[b].x)*w,p[b].y*h);c.stroke()}});
- p.forEach((x,i)=>{if(i>10&&x.visibility>.45){c.beginPath();c.arc((1-x.x)*w,x.y*h,5*devicePixelRatio,0,Math.PI*2);c.fill()}});
+
+function renderHome(){
+$("homeScore").textContent=average();
+
+const done=GAMES.filter(g=>typeof scores[g.id]==="number").length;
+
+$("heroText").textContent=
+done===7
+?"🎉 7개 게임 완료! 오늘의 체육 점수를 확인해 보세요."
+:`${done}/7 게임 완료 · 원하는 게임부터 시작해 보세요.`;
+
+$("bar").style.width=(done/7*100)+"%";
+
+$("cards").innerHTML=GAMES.map((g,i)=>`
+<article class="card ${scores[g.id]!=null?"done":""}">
+<div>
+<div class="num">GAME 0${i+1}</div>
+<div class="icon">${g.icon}</div>
+<h3>${g.name}</h3>
+<p>${g.desc}</p>
+</div>
+<button onclick="openGame('${g.id}')">
+${scores[g.id]!=null?`완료 · ${scores[g.id]}점`:"게임 시작 →"}
+</button>
+</article>`).join("");
 }
-function angle(a,b,c){let x=a.x-b.x,y=a.y-b.y,u=c.x-b.x,v=c.y-b.y;return Math.acos(Math.max(-1,Math.min(1,(x*u+y*v)/(Math.hypot(x,y)*Math.hypot(u,v)))))*180/Math.PI}
-function showResult(title,score,icon,detail){
- stopAll();score=Math.max(0,Math.min(100,Math.round(score)));
- $("stationBody").innerHTML=`<div class="panel result"><div class="resultIcon">${icon}</div><h2>${title}</h2><div class="resultScore">${score}<span style="font-size:30px"> 점</span></div><div>${detail}</div><div class="resultActions"><button id="retryBtn">🔄 다시 하기</button><button class="light" id="backListBtn">← 스테이션 목록</button></div></div>`;
- $("retryBtn").onclick=()=>openStation(currentStation);$("backListBtn").onclick=goHome;
+
+function clearRun(){
+clearInterval(timer);
+timer=null;
+cancelAnimationFrame(raf);
+active=false;
+
+if(stream){
+stream.getTracks().forEach(t=>t.stop());
+stream=null;
 }
-function finish(key,raw,icon,detail){state[key]=Math.max(0,Math.min(100,Math.round(raw)));save();showResult(names[key],state[key],icon,detail)}
-function handleSquat(r){const p=r.poseLandmarks;if(!p||!active)return;const a=(angle(p[23],p[25],p[27])+angle(p[24],p[26],p[28]))/2;if($("angle"))$("angle").textContent=Math.round(a)+"°";const m=$("liveMsg");if(a<105){phase="down";m.textContent="⬇️ 충분히 내려갔어요. 이제 올라오세요.";m.className="live good"}else if(a>155){if(phase==="down"){count++;$("count").textContent=count}phase="up";m.textContent="⬆️ 좋아요! 다음 스쿼트로.";m.className="live"}else{m.textContent="↕️ 무릎을 조금 더 굽혀 보세요.";m.className="live warn"}}
-function startSquat(){const btn=$("start");if(btn&&btn.disabled)return;if(btn){btn.disabled=true;btn.textContent="⏳ 진행 중...";}count=0;phase="up";active=true;const end=Date.now()+45000;timer=setInterval(()=>{let t=Math.max(0,Math.ceil((end-Date.now())/1000));$("time").textContent=t;if(!t){clearInterval(timer);finish("squat",count*3,"🏋️",`${count}회 수행했습니다.`)}},200)}
-function reachHTML(kind){
- const bug=kind==="bug";return `<div class="panel"><h2>${bug?"🦟 모기 잡기":"⚡ 반응속도 레이스"}</h2><p><b>마우스/화면 클릭을 사용하지 않습니다.</b> 초록색 손목 점을 목표에 직접 가져가세요.</p>
- <div class="station-layout"><div class="motion-game" id="reachGame"><video id="video" autoplay playsinline><canvas id="overlay" class="game-overlay"></canvas></video><div class="targetLabel">${bug?"🟢 초록 점 = 손목":"🔢 1 → 2 → 3 → 4 순서대로 터치"}</div><div id="target" class="target ${bug?"purple":"red"}"><span>${bug?"🦟":"1"}</span></div></div>
- <div class="guide"><h3>🎯 동작 기준</h3><div class="guide-row"><span class="badge">1</span><span>몸이 카메라에 보이게 서세요.</span></div><div class="guide-row"><span class="badge">2</span><span>초록색 손목 점을 확인하세요.</span></div><div class="guide-row"><span class="badge">3</span><span>목표까지 손을 크게 뻗으세요.</span></div><div class="guide-row"><span class="badge">4</span><span>손목이 목표에 닿으면 자동 성공!</span></div><div id="liveMsg" class="live">시작 버튼을 누르면 목표가 나타납니다.</div><div class="stat"><div class="statbox">성공<div class="num" id="reachScore">0</div></div><div class="statbox">남은 시간<div class="num" id="reachTime">${bug?30:45}</div></div></div><button id="startReachBtn">${bug?30:45}초 시작</button></div></div></div>`}
-function placeTarget(){
- const g=$("reachGame"),t=$("target");
- if(!g||!t)return;
- const size=76;
- t.style.left=Math.max(4,Math.random()*(g.clientWidth-size-8))+"px";
- t.style.top=Math.max(50,Math.random()*(g.clientHeight-size-58))+"px";
- t.style.display="block";
- if(mode==="reaction"){
-   const sp=t.querySelector("span");
-   if(sp)sp.textContent=reactionNext;
- }
 }
-function startReach(kind){
- const btn=$("startReachBtn");
- if(btn&&btn.disabled)return;
- if(btn){btn.disabled=true;btn.textContent="⏳ 진행 중...";}
- gameScore=0;mode=kind;active=true;
- if(kind==="reaction")reactionNext=1;
- $("reachScore").textContent=0;
- placeTarget();
- const sec=kind==="bug"?30:45,end=Date.now()+sec*1000;
- clearInterval(timer);
- timer=setInterval(()=>{
-   let t=Math.max(0,Math.ceil((end-Date.now())/1000));
-   $("reachTime").textContent=t;
-   if(!t){
-     clearInterval(timer);
-     finish(kind==="bug"?"hand":"reaction",gameScore*(kind==="bug"?3:4),kind==="bug"?"🦟":"⚡",
-       kind==="bug"?`${gameScore}회 성공했습니다.`:`1→2→3→4 순서로 ${gameScore}회 성공했습니다.`);
-   }
- },150)
+
+function backHome(){
+clearRun();
+$("station").classList.add("hidden");
+$("daily").classList.add("hidden");
+$("home").classList.remove("hidden");
+renderHome();
 }
-function handleReach(r){
- const p=r.poseLandmarks;
- if(!p||!active||!$("target"))return;
- const t=$("target"),g=$("reachGame"),gr=g.getBoundingClientRect(),tr=t.getBoundingClientRect();
- const tx=tr.left+tr.width/2,ty=tr.top+tr.height/2;
- let hit=false;
- [p[15],p[16]].forEach(w=>{
-   if(w&&w.visibility>.5){
-     const sx=gr.left+(1-w.x)*gr.width,sy=gr.top+w.y*gr.height;
-     if(Math.hypot(sx-tx,sy-ty)<78)hit=true;
-   }
- });
- if(hit){
-   gameScore++;
-   $("reachScore").textContent=gameScore;
-   if(mode==="reaction"){
-     reactionNext=reactionNext>=4?1:reactionNext+1;
-     $("liveMsg").textContent=`🎯 성공! 다음은 ${reactionNext}번`;
-   }else{
-     $("liveMsg").textContent="🎯 성공! 다음 목표로!";
-   }
-   $("liveMsg").className="live good";
-   placeTarget();
- }else{
-   $("liveMsg").textContent=mode==="reaction"
-     ? `🔢 ${reactionNext}번을 손바닥으로 터치하세요.`
-     : "🟢 초록색 손목 점을 목표까지 움직이세요.";
-   $("liveMsg").className="live";
- }
+
+$("back").onclick=backHome;
+
+function openGame(id){
+clearRun();
+
+current=GAMES.find(g=>g.id===id);
+
+$("home").classList.add("hidden");
+$("daily").classList.add("hidden");
+$("station").classList.remove("hidden");
+
+$("stationTitle").textContent=current.icon+" "+current.name;
+$("stationTag").textContent="GAME 0"+(GAMES.indexOf(current)+1);
+
+({
+squat:renderSquat,
+jacks:renderJacks,
+mole:renderMole,
+reaction:renderReaction,
+hunter:renderHunter,
+erase:renderErase,
+calc:renderCalc
+}[id])();
 }
-function handlePosture(r){const p=r.poseLandmarks;if(!p||!active||!$("postureLive"))return;const s=Math.abs(p[11].y-p[12].y),h=Math.abs(p[23].y-p[24].y);if(s<.035&&h<.045){postureGood++;$("postureLive").textContent="✅ 좋아요! 그대로 유지하세요.";$("postureLive").className="live good"}else if(s>=.035){$("postureLive").textContent="↔️ 어깨를 수평으로 맞춰보세요.";$("postureLive").className="live warn"}else{$("postureLive").textContent="↔️ 골반을 수평으로 맞춰보세요.";$("postureLive").className="live warn"}}
-function startPosture(){const btn=$("start");if(btn&&btn.disabled)return;if(btn){btn.disabled=true;btn.textContent="⏳ 진행 중...";}postureGood=0;active=true;const end=Date.now()+10000;timer=setInterval(()=>{let t=Math.max(0,Math.ceil((end-Date.now())/1000));$("pt").textContent=t;if(!t){clearInterval(timer);finish("posture",postureGood/60*100,"🧍","기준 자세를 유지한 정도로 점수를 계산했습니다.")}},167)}
-let latestPose=null,hitBallState=null,hitBallRaf=null;
-function handleHitBall(r){latestPose=r.poseLandmarks}
-function startHitBall(){
- const btn=$("start");if(btn&&btn.disabled)return;if(btn){btn.disabled=true;btn.textContent="⏳ 진행 중...";}
- gameScore=100;latestPose=null;active=true;hitBallState=null;
- $("hitballScore").textContent="100";$("hitballMiss").textContent="0";$("hitballTime").textContent="30";
- const started=performance.now(),end=Date.now()+30000;
- function spawn(now){const angle=Math.random()*Math.PI*2;hitBallState={angle,t:0,start:now,dur:1450+Math.random()*250,hit:false}}
- function loop(now){
-   if(!active)return;const left=Math.max(0,Math.ceil((end-Date.now())/1000));$("hitballTime").textContent=left;
-   if(!hitBallState&&now-started>650)spawn(now);
-   const c=$("overlay");
-   if(c){const dpr=devicePixelRatio||1,w=c.clientWidth,h=c.clientHeight;c.width=w*dpr;c.height=h*dpr;const ctx=c.getContext("2d");ctx.clearRect(0,0,c.width,c.height);ctx.save();ctx.scale(dpr,dpr);
-     const cx=w*.5,cy=h*.52;ctx.beginPath();ctx.arc(cx,cy,58,0,Math.PI*2);ctx.strokeStyle="rgba(255,255,255,.45)";ctx.lineWidth=3;ctx.stroke();
-     ctx.fillStyle="rgba(23,32,51,.82)";ctx.fillRect(cx-125,14,250,40);ctx.fillStyle="white";ctx.font="bold 17px Arial";ctx.textAlign="center";ctx.fillText("공이 오면 손을 뻗어 쳐내세요!",cx,40);ctx.textAlign="left";
-     const b=hitBallState;if(b){const q=Math.min(1,(now-b.start)/b.dur),sx=cx+Math.cos(b.angle)*Math.max(w,h)*.68,sy=cy+Math.sin(b.angle)*Math.max(w,h)*.68;b.x=sx+(cx-sx)*q;b.y=sy+(cy-sy)*q;const rr=Math.max(24,Math.min(w,h)*.055);ctx.beginPath();ctx.arc(b.x,b.y,rr,0,Math.PI*2);ctx.fillStyle="#f28b31";ctx.fill();ctx.lineWidth=3;ctx.strokeStyle="white";ctx.stroke();
-       let hit=false,p=latestPose;if(p){for(const wi of [15,16]){if(!p[wi]||p[wi].visibility<.35)continue;const qx=(1-p[wi].x)*w,qy=p[wi].y*h;if(Math.hypot(qx-b.x,qy-b.y)<Math.max(115,rr*4.5)){hit=true;break}}if(!hit){for(const [ei,wi] of [[13,15],[14,16]]){if(!p[ei]||!p[wi])continue;const ex=(1-p[ei].x)*w,ey=p[ei].y*h,wx=(1-p[wi].x)*w,wy=p[wi].y*h;if(Math.min(Math.hypot(wx-b.x,wy-b.y),Math.hypot(ex-b.x,ey-b.y))<135){hit=true;break}}}}
-       if(hit){hitBallState=null;$("liveMsg").textContent="✋ 쳐냈어요!";$("liveMsg").className="live good"}else if(q>=1){gameScore=Math.max(0,gameScore-10);$("hitballScore").textContent=gameScore;$("hitballMiss").textContent=Number($("hitballMiss").textContent)+1;$("liveMsg").textContent="💥 맞았어요! -10점";$("liveMsg").className="live warn";hitBallState=null}}
-     ctx.fillStyle="white";ctx.font="bold 20px Arial";ctx.fillText(`현재 점수 ${gameScore}점`,18,78);ctx.restore();}
-   if(left<=0){finish("hitball",gameScore,"🥎",`100점에서 시작해 몸에 닿은 공마다 10점씩 차감했습니다. 맞은 공 ${$("hitballMiss").textContent}회`);return}
-   hitBallRaf=requestAnimationFrame(loop)
- }
- hitBallRaf=requestAnimationFrame(loop)
+
+function side(rule,hint,stats,startId="startBtn"){
+return `
+<aside class="side">
+<h4>HOW TO PLAY</h4>
+<div class="rule">${rule}</div>
+<div class="hint">${hint}</div>
+<div class="stats">${stats}</div>
+<div id="msg" class="live">시작 버튼을 눌러 시작!</div>
+<button class="start" id="${startId}">시작하기</button>
+</aside>`;
 }
-function openStation(n){
- currentStation=n;stopAll();$("home").classList.add("hidden");$("station").classList.remove("hidden");
- $("title").innerHTML=`<h2 style="display:inline;margin-left:12px">${["","🏋️ 스쿼트 챌린지","⚡ 반응속도 레이스","","🦟 모기 잡기","🧍 AI 자세 체크","","🥎 양손 공 쳐내기"][n]}</h2>`;
- if(n===1){$("stationBody").innerHTML=`<div class="panel"><h2>🏋️ 스쿼트 챌린지</h2><div class="station-layout"><div class="video-wrap"><video id="video" autoplay playsinline></video><canvas id="overlay" class="overlay"></canvas></div><div class="guide"><h3>동작 기준</h3><div class="guide-row"><span class="badge">1</span><span>전신이 화면에 보이게 서세요.</span></div><div class="guide-row"><span class="badge">2</span><span>초록선은 AI가 보는 관절입니다.</span></div><div class="guide-row"><span class="badge">3</span><span>무릎 105° 이하로 내려가세요.</span></div><div id="liveMsg" class="live">카메라 준비 중...</div><div class="stat"><div class="statbox">무릎<div class="num" id="angle">-</div></div><div class="statbox">횟수<div class="num" id="count">0</div></div><div class="statbox">시간<div class="num" id="time">45</div></div></div><button id="start">45초 시작</button></div></div></div>`;$("start").onclick=startSquat;startCamera($("video"),"squat")}
- if(n===2||n===4){$("stationBody").innerHTML=reachHTML(n===4?"bug":"reach");$("startReachBtn").onclick=()=>startReach(n===4?"bug":"reach");startCamera($("video"),n===4?"bug":"reach")}
- if(n===5){$("stationBody").innerHTML=`<div class="panel"><h2>🧍 AI 자세 체크</h2><div class="station-layout"><div class="video-wrap"><video id="video" autoplay playsinline></video><canvas id="overlay" class="overlay"></canvas></div><div class="guide"><h3>동작 기준</h3><div class="guide-row"><span class="badge">1</span><span>카메라를 정면으로 보세요.</span></div><div class="guide-row"><span class="badge">2</span><span>어깨와 골반을 수평으로 맞추세요.</span></div><div id="postureLive" class="live">카메라 준비 중...</div><div class="stat"><div class="statbox">시간<div class="num" id="pt">10</div></div></div><button id="start">10초 측정</button></div></div></div>`;$("start").onclick=startPosture;startCamera($("video"),"posture")}
- if(n===7){$("stationBody").innerHTML=`<div class="panel"><h2>🥎 양손 공 쳐내기</h2><div class="station-layout"><div class="video-wrap"><video id="video" autoplay playsinline></video><canvas id="overlay" class="overlay"></canvas></div><div class="guide"><h3>게임 방법</h3><div class="guide-row"><span class="badge">1</span><span>화면 가운데에 서세요.</span></div><div class="guide-row"><span class="badge">2</span><span>공이 <b>360도 사방</b>에서 한 개씩 중앙으로 빠르게 날아옵니다.</span></div><div class="guide-row"><span class="badge">3</span><span>손을 공 쪽으로 뻗어 <b>손으로 쳐내세요.</b></span></div><div class="guide-row"><span class="badge">4</span><span>공이 몸까지 들어오면 <b>-10점</b>입니다. 100점에서 시작합니다.</span></div><div id="liveMsg" class="live">카메라 준비 중...</div><div class="stat"><div class="statbox">현재 점수<div class="num" id="hitballScore">100</div></div><div class="statbox">맞은 공<div class="num" id="hitballMiss">0</div></div><div class="statbox">시간<div class="num" id="hitballTime">30</div></div></div><button id="start">30초 시작</button></div></div></div>`;$("start").onclick=startHitBall;startCamera($("video"),"hitball")}
+
+function layout(play,sideHtml){
+$("body").innerHTML=`
+<div class="gameLayout">
+<div class="playArea">${play}</div>
+${sideHtml}
+</div>`;
 }
-function goHome(){stopAll();$("station").classList.add("hidden");$("home").classList.remove("hidden");render()}
-$("homeBtn").onclick=goHome;$("resetBtn").onclick=()=>{localStorage.removeItem("gym5");location.reload()};
-document.querySelectorAll(".card").forEach(c=>{c.onclick=()=>openStation(Number(c.dataset.station))});render();
+
+function endGame(score,extra=""){
+score=Math.max(0,Math.min(100,Math.round(score)));
+scores[current.id]=score;
+save();
+active=false;
+clearInterval(timer);
+$("msg").textContent="게임 종료!";
+showResult(score,extra);
+}
+
+function showResult(score,extra){
+const p=document.createElement("div");
+p.className="result";
+
+p.innerHTML=`
+<div class="resultBox">
+<div style="font-weight:900;color:#64748b">GAME RESULT</div>
+<div class="big">${score}</div>
+<b>POINT</b>
+<p>${extra||"좋아요! 다음 게임에 도전해 보세요."}</p>
+<button onclick="backHome()">목록으로 돌아가기</button>
+</div>`;
+
+document.querySelector(".playArea").appendChild(p);
+}
+
+function countdown(sec,fn){
+let t=sec;
+active=true;
+fn(t);
+
+timer=setInterval(()=>{
+t--;
+fn(t);
+
+if(t<=0){
+clearInterval(timer);
+timer=null;
+active=false;
+}
+},1000);
+}
+
+/* camera */
+async function camera(video){
+try{
+stream=await navigator.mediaDevices.getUserMedia({
+video:{width:1280,height:720},
+audio:false
+});
+
+video.srcObject=stream;
+return true;
+}
+catch(e){
+$("msg").textContent="카메라 권한을 허용해 주세요.";
+return false;
+}
+}
+
+function loadPose(){
+if(pose)return Promise.resolve(pose);
+
+return new Promise(resolve=>{
+if(window.Pose){
+pose=new Pose({
+locateFile:f=>`https://cdn.jsdelivr.net/npm/@mediapipe/pose/${f}`
+});
+
+pose.setOptions({
+modelComplexity:1,
+smoothLandmarks:true,
+minDetectionConfidence:.55,
+minTrackingConfidence:.55
+});
+
+resolve(pose);
+return;
+}
+
+const s=document.createElement("script");
+
+s.src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js";
+
+s.onload=()=>{
+pose=new Pose({
+locateFile:f=>`https://cdn.jsdelivr.net/npm/@mediapipe/pose/${f}`
+});
+
+pose.setOptions({
+modelComplexity:1,
+smoothLandmarks:true,
+minDetectionConfidence:.55,
+minTrackingConfidence:.55
+});
+
+resolve(pose);
+};
+
+document.head.appendChild(s);
+});
+}
+
+async function startPose(video,handler){
+const p=await loadPose();
+
+await camera(video);
+
+const loop=async()=>{
+if(!active)return;
+
+try{
+await p.send({image:video});
+}catch(e){}
+
+raf=requestAnimationFrame(loop);
+};
+
+p.onResults(handler);
+loop();
+}
+
+/* squat */
+function renderSquat(){
+
+layout(`
+<div class="camWrap">
+<video id="video" autoplay playsinline></video>
+<canvas id="canvas" class="overlay"></canvas>
+<div class="guideLine"></div>
+<div class="guideText">전신이 화면에 보이게 서세요</div>
+</div>`,
+
+side(
+"무릎을 굽혀<br>깊게 앉았다 일어나!",
+"발이 모두 보이도록 서고, 허리를 너무 숙이지 마세요.",
+`<div class="stat">횟수<b id="count">0</b></div>
+<div class="stat">시간<b id="time">45</b></div>`
+));
+
+$("startBtn").onclick=startSquat;
+}
+
+async function startSquat(){
+
+if(active)return;
+
+$("startBtn").textContent="진행 중…";
+$("startBtn").classList.add("running");
+$("count").textContent=0;
+
+gameData={phase:"up",count:0};
+
+const video=$("video");
+
+await startPose(video,r=>{
+if(!active||!r.poseLandmarks)return;
+
+const p=r.poseLandmarks;
+
+const a1=ang(p[23],p[25],p[27]);
+const a2=ang(p[24],p[26],p[28]);
+const a=(a1+a2)/2;
+
+if(a<110)gameData.phase="down";
+
+if(a>155&&gameData.phase==="down"){
+gameData.count++;
+gameData.phase="up";
+$("count").textContent=gameData.count;
+}
+
+$("msg").textContent=
+a<110
+?"⬇️ 더 내려가세요!"
+:"⬆️ 좋아요!";
+});
+
+countdown(45,t=>{
+$("time").textContent=t;
+
+if(t<=0){
+endGame(
+Math.min(100,gameData.count*4),
+`${gameData.count}회 성공`
+);
+}
+});
+}
+
+function ang(a,b,c){
+if(!a||!b||!c)return 180;
+
+const ab={
+x:a.x-b.x,
+y:a.y-b.y
+};
+
+const cb={
+x:c.x-b.x,
+y:c.y-b.y
+};
+
+const dot=ab.x*cb.x+ab.y*cb.y;
+const l=Math.hypot(ab.x,ab.y)*Math.hypot(cb.x,cb.y);
+
+return Math.acos(
+Math.max(-1,Math.min(1,dot/l))
+)*180/Math.PI;
+}
+
+/* jumping jacks */
+function renderJacks(){
+
+layout(`
+<div class="camWrap">
+<video id="video" autoplay playsinline></video>
+<canvas id="canvas" class="overlay"></canvas>
+<div class="guideLine"></div>
+<div class="guideText">팔·다리를 크게 벌렸다 모으세요</div>
+</div>`,
+
+side(
+"팔과 다리를<br>크게 벌려!",
+"전신이 화면에 들어오게 서서 팔과 다리를 동시에 벌렸다 모아 주세요.",
+`<div class="stat">성공<b id="count">0</b></div>
+<div class="stat">시간<b id="time">30</b></div>`
+));
+
+$("startBtn").onclick=startJacks;
+}
+
+async function startJacks(){
+
+if(active)return;
+
+$("startBtn").textContent="진행 중…";
+
+gameData={
+open:false,
+count:0
+};
+
+await startPose($("video"),r=>{
+
+if(!active||!r.poseLandmarks)return;
+
+const p=r.poseLandmarks;
+
+const lw=p[15],
+rw=p[16],
+la=p[27],
+ra=p[28],
+ls=p[11],
+rs=p[12];
+
+if(!lw||!rw||!la||!ra)return;
+
+const shoulder=Math.abs(ls.x-rs.x);
+const ankle=Math.abs(la.x-ra.x);
+
+const arms=
+lw.y<ls.y-.08 &&
+rw.y<rs.y-.08;
+
+const legs=
+ankle>shoulder*1.35;
+
+if(arms&&legs&&!gameData.open){
+gameData.open=true;
+$("msg").textContent="🟢 벌리기 성공!";
+}
+
+if(!arms&&!legs&&gameData.open){
+gameData.open=false;
+gameData.count++;
+$("count").textContent=gameData.count;
+$("msg").textContent="좋아요!";
+}
+
+});
+
+countdown(30,t=>{
+$("time").textContent=t;
+
+if(t<=0){
+endGame(
+Math.min(100,gameData.count*5),
+`${gameData.count}회 성공`
+);
+}
+});
+}
+
+/* mole */
+function renderMole(){
+
+const holes=Array.from(
+{length:9},
+(_,i)=>`
+<button class="hole" data-i="${i}">
+<span class="moleFace">😎</span>
+</button>`
+).join("");
+
+layout(
+`<div class="moleBoard" id="moles">${holes}</div>`,
+
+side(
+"두더지가 나오면<br>빠르게 눌러!",
+"30초 동안 나타나는 두더지를 최대한 많이 잡으세요.",
+`<div class="stat">성공<b id="count">0</b></div>
+<div class="stat">시간<b id="time">30</b></div>`
+));
+
+document.querySelectorAll(".hole").forEach(h=>
+h.onclick=()=>{
+if(active&&h.classList.contains("active")){
+h.classList.remove("active");
+gameData.hit++;
+$("count").textContent=gameData.hit;
+}
+});
+
+$("startBtn").onclick=startMole;
+}
+
+function startMole(){
+
+if(active)return;
+
+$("startBtn").textContent="진행 중…";
+
+gameData={hit:0};
+
+let last=-1;
+
+const pop=()=>{
+
+if(!active)return;
+
+document.querySelectorAll(".hole")
+.forEach(h=>h.classList.remove("active"));
+
+let i=Math.floor(Math.random()*9);
+
+while(i===last)
+i=Math.floor(Math.random()*9);
+
+last=i;
+
+document
+.querySelector(`.hole[data-i="${i}"]`)
+.classList.add("active");
+
+setTimeout(()=>{
+const h=document.querySelector(`.hole[data-i="${i}"]`);
+if(h)h.classList.remove("active");
+},700);
+
+setTimeout(pop,850);
+};
+
+active=true;
+pop();
+
+countdown(30,t=>{
+$("time").textContent=t;
+
+if(t<=0){
+endGame(
+Math.min(100,gameData.hit*5),
+`${gameData.hit}마리 잡기 성공`
+);
+}
+});
+}
+
+/* reaction */
+function renderReaction(){
+
+layout(
+`<div id="reactionArea" style="position:absolute;inset:0;background:#eef4f8">
+<div class="guideText">숫자를 1 → 2 → 3… 순서대로 눌러!</div>
+<div id="reactionTarget" class="target reaction">
+<span>1</span>
+</div>
+</div>`,
+
+side(
+"숫자를 순서대로<br>빠르게 터치!",
+"45초 동안 나타나는 숫자를 순서대로 클릭하세요. 맞히면 다음 숫자가 새 위치에 나타납니다.",
+`<div class="stat">성공<b id="count">0</b></div>
+<div class="stat">시간<b id="time">45</b></div>`
+));
+
+$("startBtn").onclick=startReaction;
+}
+
+function placeReaction(){
+
+const t=$("reactionTarget");
+const a=$("reactionArea");
+
+t.style.left=(8+Math.random()*76)+"%";
+t.style.top=(20+Math.random()*65)+"%";
+
+t.querySelector("span").textContent=gameData.next;
+}
+
+function startReaction(){
+
+if(active)return;
+
+$("startBtn").textContent="진행 중…";
+
+gameData={
+next:1,
+hit:0
+};
+
+placeReaction();
+
+$("reactionTarget").onclick=()=>{
+
+if(!active)return;
+
+gameData.hit++;
+gameData.next++;
+
+$("count").textContent=gameData.hit;
+
+const t=$("reactionTarget");
+
+t.classList.add("fade");
+
+setTimeout(()=>{
+t.classList.remove("fade");
+placeReaction();
+},130);
+};
+
+countdown(45,t=>{
+$("time").textContent=t;
+
+if(t<=0){
+endGame(
+Math.min(100,gameData.hit*4),
+`${gameData.hit}개 성공`
+);
+}
+});
+}
+
+/* number hunter */
+function renderHunter(){
+
+layout(
+`<div id="hunterArea" style="position:absolute;inset:0;background:#f1f5f9">
+<div class="guideText">1부터 순서대로 모두 찾아라!</div>
+<div id="hunterTargets"></div>
+</div>`,
+
+side(
+"숫자를 찾아<br>순서대로 터치!",
+"30초 안에 1부터 20까지 최대한 많이 찾아보세요.",
+`<div class="stat">성공<b id="count">0</b></div>
+<div class="stat">시간<b id="time">30</b></div>`
+));
+
+$("startBtn").onclick=startHunter;
+}
+
+function startHunter(){
+
+if(active)return;
+
+$("startBtn").textContent="진행 중…";
+
+gameData={
+next:1,
+hit:0
+};
+
+spawnHunter();
+
+countdown(30,t=>{
+$("time").textContent=t;
+
+if(t<=0){
+endGame(
+Math.min(100,gameData.hit*5),
+`${gameData.hit}개 찾기 성공`
+);
+}
+});
+}
+
+function spawnHunter(){
+
+const box=$("hunterTargets");
+
+box.innerHTML="";
+
+const nums=[];
+
+for(let i=0;i<12;i++)
+nums.push(gameData.next+i);
+
+nums.sort(()=>Math.random()-.5);
+
+nums.forEach(n=>{
+
+const b=document.createElement("button");
+
+b.className="target numberTarget";
+
+b.style.left=(6+Math.random()*84)+"%";
+b.style.top=(16+Math.random()*72)+"%";
+
+b.textContent=n;
+
+b.onclick=()=>{
+
+if(!active)return;
+
+if(n===gameData.next){
+
+gameData.hit++;
+gameData.next++;
+
+$("count").textContent=gameData.hit;
+
+b.classList.add("fade");
+
+setTimeout(()=>b.remove(),100);
+
+if(gameData.next>20){
+
+endGame(
+100,
+"20개 모두 성공!"
+);
+
+return;
+}
+
+}else{
+
+$("msg").textContent="❌ 순서를 확인하세요.";
+
+setTimeout(()=>
+$("msg").textContent="",
+500
+);
+}
+};
+
+box.appendChild(b);
+});
+}
+
+/* blackboard */
+function renderErase(){
+
+const words=[
+"체육",
+"달리기",
+"협동",
+"건강",
+"도전",
+"스포츠",
+"성공",
+"힘",
+"균형",
+"집중",
+"민첩",
+"스쿼트",
+"점프",
+"패스",
+"팀워크"
+];
+
+layout(
+`<div class="board">
+<div class="chalk" id="chalk">
+<div class="chalkGrid"></div>
+
+${words.map((w,i)=>
+`<span class="word" style="left:${8+Math.random()*78}%;top:${8+Math.random()*78}%">${w}</span>`
+).join("")}
+
+<div class="eraser" id="eraser"></div>
+</div>
+</div>`,
+
+side(
+"칠판 글씨를<br>빠르게 지워!",
+"마우스/터치로 글씨를 눌러 지우세요. 카메라가 없는 기기에서도 바로 플레이할 수 있습니다.",
+`<div class="stat">지운 수<b id="count">0</b></div>
+<div class="stat">시간<b id="time">30</b></div>`
+));
+
+$("startBtn").onclick=startErase;
+}
+
+function startErase(){
+
+if(active)return;
+
+$("startBtn").textContent="진행 중…";
+
+gameData={hit:0};
+
+const chalk=$("chalk");
+
+chalk.querySelectorAll(".word").forEach(w=>
+
+w.onclick=()=>{
+
+if(
+active &&
+!w.classList.contains("gone")
+){
+
+w.classList.add("gone");
+w.style.opacity=0;
+
+gameData.hit++;
+
+$("count").textContent=gameData.hit;
+
+$("msg").textContent="🧽 지우기 성공!";
+}
+});
+
+countdown(30,t=>{
+
+$("time").textContent=t;
+
+if(t<=0){
+
+endGame(
+Math.min(100,gameData.hit*7),
+`${gameData.hit}개 지우기 성공`
+);
+
+}
+});
+}
+
+/* calculation */
+function renderCalc(){
+
+layout(
+`<div class="calc">
+<div class="guideText" style="top:14px;left:14px">
+정답을 빠르게 선택!
+</div>
+
+<div class="equation" id="eq">
+3 + 4 = ?
+</div>
+
+<div class="answers" id="answers"></div>
+</div>`,
+
+side(
+"계산하고<br>정답을 골라!",
+"30초 동안 나오는 계산 문제의 정답을 빠르게 눌러 보세요.",
+`<div class="stat">정답<b id="count">0</b></div>
+<div class="stat">시간<b id="time">30</b></div>`
+));
+
+$("startBtn").onclick=startCalc;
+}
+
+function newCalc(){
+
+let a=1+Math.floor(Math.random()*9);
+let b=1+Math.floor(Math.random()*9);
+
+let op=Math.random()<.5?"+":"-";
+
+if(op==="-"&&b>a)
+[a,b]=[b,a];
+
+let ans=op==="+"?a+b:a-b;
+
+gameData.answer=ans;
+
+$("eq").textContent=`${a} ${op} ${b} = ?`;
+
+let opts=[ans];
+
+while(opts.length<4){
+
+let x=ans+Math.floor(Math.random()*9)-4;
+
+if(x>=0&&!opts.includes(x))
+opts.push(x);
+}
+
+opts.sort(()=>Math.random()-.5);
+
+$("answers").innerHTML=opts
+.map(x=>`<button>${x}</button>`)
+.join("");
+
+document
+.querySelectorAll("#answers button")
+.forEach(b=>
+
+b.onclick=()=>{
+
+if(!active)return;
+
+if(Number(b.textContent)===gameData.answer){
+
+gameData.hit++;
+
+$("count").textContent=gameData.hit;
+
+$("msg").textContent="⭕ 정답!";
+
+newCalc();
+
+}else{
+
+$("msg").textContent="❌ 다시 계산!";
+
+setTimeout(()=>
+$("msg").textContent="",
+450
+);
+
+}
+});
+}
+
+function startCalc(){
+
+if(active)return;
+
+$("startBtn").textContent="진행 중…";
+
+gameData={hit:0};
+
+newCalc();
+
+countdown(30,t=>{
+
+$("time").textContent=t;
+
+if(t<=0){
+
+endGame(
+Math.min(100,gameData.hit*8),
+`${gameData.hit}문제 정답`
+);
+
+}
+});
+}
+
+/* all complete */
+function showDaily(){
+
+clearRun();
+
+$("home").classList.add("hidden");
+$("station").classList.add("hidden");
+$("daily").classList.remove("hidden");
+
+const avg=average();
+
+$("daily").innerHTML=`
+<div class="daily">
+
+<div style="color:#93c5fd;font-weight:900">
+TODAY'S PE SCORE
+</div>
+
+<h2>오늘의 체육 점수</h2>
+
+<div class="dailyScore">${avg}</div>
+
+<div>POINT</div>
+
+<div class="breakdown">
+
+${GAMES.map(g=>
+`<div class="break">
+<span>${g.icon} ${g.name}</span>
+<b>${scores[g.id]??0}</b>
+</div>`
+).join("")}
+
+</div>
+
+<div class="resultBtns">
+
+<button class="primary" onclick="backHome()">
+게임 목록으로
+</button>
+
+<button class="secondary" onclick="resetScores()">
+오늘 기록 초기화
+</button>
+
+</div>
+
+</div>`;
+}
+
+function resetScores(){
+
+if(confirm("오늘의 게임 기록을 초기화할까요?")){
+
+GAMES.forEach(g=>
+delete scores[g.id]
+);
+
+save();
+backHome();
+}
+}
+
+window.openGame=openGame;
+
+renderHome();
 </script>
-</body></html>
+</body>
+</html>
