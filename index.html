@@ -975,6 +975,7 @@ let samples = [];
 let poseBusy = false;
 
 let handsBusy = false;
+let analysisRunning = false;
 
 let lastAnalysisTime = 0;
 
@@ -1222,7 +1223,7 @@ async function startCamera(){
           facingMode:"user"
         },
 
-        audio:true
+        audio:false
 
       });
 
@@ -1252,7 +1253,7 @@ async function startCamera(){
 
 
     statusBox.textContent =
-      "카메라 권한을 허용해주세요.";
+      "카메라를 사용할 수 없습니다. 브라우저 주소창의 카메라 권한을 허용한 뒤 다시 눌러주세요.";
 
 
     return false;
@@ -2696,8 +2697,11 @@ function analyzeShootResult(){
 }
 
 async function analysisLoop(){
+  if(!analysisRunning) return;
+
   if(liveVideo.readyState >= 2){
     resizeCanvas();
+
     if(pose && !poseBusy){
       poseBusy=true;
       try{
@@ -2708,6 +2712,7 @@ async function analysisLoop(){
         poseBusy=false;
       }
     }
+
     if(hands && !handsBusy){
       handsBusy=true;
       try{
@@ -2719,6 +2724,7 @@ async function analysisLoop(){
       }
     }
   }
+
   requestAnimationFrame(analysisLoop);
 }
 
@@ -2734,14 +2740,29 @@ function resetRecordingState(){
 async function startRecording(){
   if(recording) return;
 
+  startBtn.disabled=true;
+  startBtn.textContent='카메라 준비 중…';
+  statusBox.textContent='카메라를 준비하고 있습니다…';
+
   if(!stream){
     const ok=await startCamera();
-    if(!ok) return;
+    if(!ok){
+      startBtn.disabled=false;
+      startBtn.textContent='촬영 시작';
+      return;
+    }
   }
 
   if(!pose){
     statusBox.textContent='AI 자세 분석을 불러오지 못했습니다. 인터넷 연결을 확인해주세요.';
+    startBtn.disabled=false;
+    startBtn.textContent='촬영 시작';
     return;
+  }
+
+  if(!analysisRunning){
+    analysisRunning=true;
+    requestAnimationFrame(analysisLoop);
   }
 
   samples=[];
@@ -2826,29 +2847,9 @@ stopBtn.disabled =
 
 
 /*
-  시작
+  페이지를 열었을 때 카메라를 자동으로 켜지 않는다.
+  반드시 [촬영 시작]을 눌렀을 때 카메라 권한을 요청하고 분석을 시작한다.
 */
-
-(async function(){
-
-  try{
-
-    const ok = await startCamera();
-
-    if(ok){
-      statusBox.textContent = "카메라 준비 완료. 촬영 시작을 눌러주세요.";
-    }
-
-  }catch(error){
-
-    console.error(error);
-    statusBox.textContent = "카메라를 준비하지 못했습니다. 브라우저의 카메라 권한을 확인해주세요.";
-
-  }
-
-  requestAnimationFrame(analysisLoop);
-
-})();
 
 </script>
 
