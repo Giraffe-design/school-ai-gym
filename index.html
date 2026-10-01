@@ -1088,10 +1088,10 @@ pose.onResults(
             releaseAngle:
               metrics.releaseAngle,
 
-            rise:
-              metrics.rise,
+            metrics: metrics,
 
-            metrics: metrics
+            rise:
+              metrics.rise
 
           });
 
@@ -2676,109 +2676,115 @@ async function analysisLoop(){
   requestAnimationFrame(analysisLoop);
 }
 
+
+/* =========================================================
+   촬영 시작 / 종료
+   기존 카메라 자동 준비 방식은 그대로 유지합니다.
+========================================================= */
+
 async function startRecording(){
-  if(recording)return;
-  if(!stream){
-    const ok=await startCamera();
-    if(!ok)return;
-  }
-  if(!pose){
-    statusBox.textContent='AI 자세 분석을 불러오지 못했습니다. 인터넷 연결을 확인해주세요.';
-    return;
-  }
+  if(recording) return;
 
-  samples=[];
-  releaseDetected=false;
-  previousElbow=null;
-  lastAnalysisTime=0;
-  resetResults();
-  if(currentMode==='shoot'){
-    phaseBadge.textContent='준비';
-    statusBox.textContent=shootType==='two'?'투핸드 슛을 평소처럼 해주세요.':'원핸드 슛을 평소처럼 해주세요.';
-  }else{
-    phaseBadge.textContent='준비';
-    statusBox.textContent='팔꿈치를 몸에 붙이고 시작한 뒤 가슴 앞에서 패스하세요.';
-  }
+  // 버튼을 누른 즉시 상태가 바뀌도록 먼저 처리
+  startBtn.disabled = true;
+  stopBtn.disabled = true;
+  startBtn.textContent = "촬영 준비 중…";
+  statusBox.textContent = "촬영을 준비하고 있습니다…";
 
-  recording=true;
-  recordingStart=performance.now();
-  recordingBadge.style.display='block';
-  startBtn.disabled=true;
-  stopBtn.disabled=false;
-  startBtn.textContent='촬영 중…';
+  try{
+    if(!stream){
+      const ok = await startCamera();
+      if(!ok) throw new Error("카메라를 준비하지 못했습니다.");
+    }
 
-  recordedChunks=[];
-  if(window.MediaRecorder&&stream){
-    try{
-      const mime=MediaRecorder.isTypeSupported('video/webm;codecs=vp9')?'video/webm;codecs=vp9':'video/webm';
-      mediaRecorder=new MediaRecorder(stream,{mimeType:mime});
-      mediaRecorder.ondataavailable=e=>{if(e.data&&e.data.size)recordedChunks.push(e.data);};
-      mediaRecorder.start(250);
-    }catch(e){mediaRecorder=null;}
+    if(!pose){
+      throw new Error("AI 자세 분석이 준비되지 않았습니다.");
+    }
+
+    samples = [];
+    releaseDetected = false;
+    previousElbow = null;
+    lastAnalysisTime = 0;
+    resetResults();
+
+    phaseBadge.textContent = "준비";
+    statusBox.textContent = currentMode === "shoot"
+      ? "슛 자세를 시작하세요."
+      : "팔꿈치를 몸에 붙이고 시작한 뒤 패스하세요.";
+
+    recording = true;
+    recordingStart = performance.now();
+    recordingBadge.style.display = "block";
+    stopBtn.disabled = false;
+    startBtn.textContent = "촬영 중…";
+
+    recordedChunks = [];
+    if(window.MediaRecorder && stream){
+      try{
+        const mime = MediaRecorder.isTypeSupported("video/webm;codecs=vp9")
+          ? "video/webm;codecs=vp9"
+          : "video/webm";
+        mediaRecorder = new MediaRecorder(stream,{mimeType:mime});
+        mediaRecorder.ondataavailable = e => {
+          if(e.data && e.data.size) recordedChunks.push(e.data);
+        };
+        mediaRecorder.start(250);
+      }catch(e){
+        mediaRecorder = null;
+      }
+    }
+  }catch(error){
+    console.error(error);
+    recording = false;
+    recordingBadge.style.display = "none";
+    stopBtn.disabled = true;
+    startBtn.disabled = false;
+    startBtn.textContent = "촬영 시작";
+    statusBox.textContent = error.message || "촬영을 시작하지 못했습니다.";
   }
 }
 
 function stopRecording(){
-  if(!recording)return;
-  recording=false;
-  recordingBadge.style.display='none';
-  stopBtn.disabled=true;
-  startBtn.disabled=false;
-  startBtn.textContent='다시 촬영';
-  phaseBadge.textContent='분석 완료';
-  if(mediaRecorder&&mediaRecorder.state!=='inactive'){
-    try{mediaRecorder.stop();}catch(e){}
+  if(!recording) return;
+
+  recording = false;
+  recordingBadge.style.display = "none";
+  stopBtn.disabled = true;
+  startBtn.disabled = false;
+  startBtn.textContent = "다시 촬영";
+  phaseBadge.textContent = "분석 완료";
+
+  if(mediaRecorder && mediaRecorder.state !== "inactive") {
+    try{ mediaRecorder.stop(); }catch(e){}
   }
-  if(samples.length){
+
+  try{
     showFinalResults();
-    statusBox.textContent='촬영이 끝났습니다. 오른쪽에서 자세 결과를 확인하세요.';
-  }else{
-    statusBox.textContent='촬영 데이터가 없습니다. 카메라에 몸 전체가 보이는지 확인해주세요.';
+    statusBox.textContent = "촬영이 끝났습니다. 오른쪽에서 자세 결과를 확인하세요.";
+  }catch(error){
+    console.error(error);
+    statusBox.textContent = "촬영은 끝났지만 결과 계산 중 오류가 발생했습니다.";
   }
 }
 
-startBtn.addEventListener('click',startRecording);
-stopBtn.addEventListener('click',stopRecording);
+startBtn.addEventListener("click", startRecording);
+stopBtn.addEventListener("click", stopRecording);
 
-/* =========================================================
-   시작
-========================================================= */
-
-startBtn.dataset.mode =
-  "camera";
-
-
-startBtn.textContent =
-  "촬영 시작";
-
-
-stopBtn.disabled =
-  true;
-
-
-/*
-  시작
-*/
+startBtn.dataset.mode = "camera";
+startBtn.textContent = "촬영 시작";
+stopBtn.disabled = true;
 
 (async function(){
-
   try{
-
     const ok = await startCamera();
-
     if(ok){
       statusBox.textContent = "카메라 준비 완료. 촬영 시작을 눌러주세요.";
     }
-
   }catch(error){
-
     console.error(error);
     statusBox.textContent = "카메라를 준비하지 못했습니다. 브라우저의 카메라 권한을 확인해주세요.";
-
   }
-
   requestAnimationFrame(analysisLoop);
-
 })();
 
 </script>
