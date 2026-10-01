@@ -901,6 +901,21 @@ button:disabled{
 
 <script>
 
+
+window.addEventListener('error', (event)=>{
+  console.error(event.error || event.message);
+  if(statusBox){
+    statusBox.textContent = `실행 오류: ${event.message || '알 수 없는 오류'}`;
+  }
+});
+
+window.addEventListener('unhandledrejection', (event)=>{
+  console.error(event.reason);
+  if(statusBox){
+    statusBox.textContent = `실행 오류: ${event.reason?.message || event.reason || '알 수 없는 오류'}`;
+  }
+});
+
 /* =========================================================
    기본 변수
 ========================================================= */
@@ -1253,7 +1268,8 @@ async function startCamera(){
 
 
     statusBox.textContent =
-      "카메라를 사용할 수 없습니다. 브라우저 주소창의 카메라 권한을 허용한 뒤 다시 눌러주세요.";
+      `카메라를 사용할 수 없습니다. (${error?.name || "알 수 없는 오류"})` +
+      (location.protocol === "file:" ? " HTTPS 주소(GitHub Pages)에서 열어주세요." : " 브라우저의 카메라 권한을 확인해주세요.");
 
 
     return false;
@@ -2708,6 +2724,7 @@ async function analysisLoop(){
         await pose.send({image:liveVideo});
       }catch(e){
         console.error('Pose 분석 오류:',e);
+        statusBox.textContent = `AI 분석 오류: ${e?.message || 'Pose 처리 실패'}`;
       }finally{
         poseBusy=false;
       }
@@ -2754,7 +2771,14 @@ async function startRecording(){
   }
 
   if(!pose){
-    statusBox.textContent='AI 자세 분석을 불러오지 못했습니다. 인터넷 연결을 확인해주세요.';
+    statusBox.textContent='AI 자세 분석(Pose)을 불러오지 못했습니다. 인터넷 연결 또는 학교망의 CDN 차단 여부를 확인해주세요.';
+    startBtn.disabled=false;
+    startBtn.textContent='촬영 시작';
+    return;
+  }
+
+  if(liveVideo.readyState < 2 || !liveVideo.videoWidth){
+    statusBox.textContent='카메라 영상이 아직 준비되지 않았습니다. 잠시 후 다시 눌러주세요.';
     startBtn.disabled=false;
     startBtn.textContent='촬영 시작';
     return;
@@ -2814,6 +2838,7 @@ function stopRecording(){
   startBtn.disabled=false;
   startBtn.textContent='다시 촬영';
   phaseBadge.textContent='분석 완료';
+  analysisRunning=true;
 
   if(mediaRecorder && mediaRecorder.state!=='inactive'){
     try{ mediaRecorder.stop(); }catch(e){}
