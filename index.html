@@ -1,1030 +1,2856 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>우리학교 AI 체육관</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>AI 농구 자세 코치</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
+
 <style>
-*{box-sizing:border-box}
-:root{--ink:#172033;--muted:#667085;--line:#e6eaf0;--bg:#f5f7fb;--card:#fff;--accent:#3b82f6;--good:#16a34a;--bad:#ef4444}
-body{margin:0;font-family:Arial,"Noto Sans KR",sans-serif;color:var(--ink);background:linear-gradient(135deg,#f7f9fc,#edf4ff);min-height:100vh}
-button{font:inherit;cursor:pointer}
-.hidden{display:none!important}
-.app{max-width:1180px;margin:0 auto;padding:24px}
-.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
-.brand{font-weight:900;font-size:22px}.brand small{display:block;color:#7a8495;font-size:11px;letter-spacing:1.5px;margin-top:3px}
-.badge{padding:8px 12px;background:#fff;border:1px solid var(--line);border-radius:999px;font-weight:800;font-size:13px}
-.hero{background:var(--ink);color:white;border-radius:28px;padding:30px;display:flex;justify-content:space-between;gap:20px;align-items:center;box-shadow:0 18px 45px #17203322}
-.hero h1{font-size:38px;margin:4px 0 8px}.hero p{margin:0;color:#cbd5e1}.heroScore{text-align:center;min-width:180px}.heroScore strong{font-size:68px;line-height:1}.heroScore span{display:block;color:#cbd5e1;font-weight:800}
-.progress{height:8px;background:#ffffff22;border-radius:9px;margin-top:20px;overflow:hidden}.progress i{display:block;height:100%;background:#60a5fa;width:0;transition:.3s}
-.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:18px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:20px;min-height:205px;display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 8px 25px #1720330a;transition:.2s}.card:hover{transform:translateY(-3px);box-shadow:0 14px 30px #17203316}
-.card.done{border-color:#86efac}.num{font-size:12px;font-weight:900;color:#94a3b8;letter-spacing:1px}.icon{font-size:42px;margin:12px 0 4px}.card h3{margin:0 0 5px;font-size:21px}.card p{margin:0;color:var(--muted);font-size:13px}.card button{margin-top:14px;border:0;background:#eef4ff;color:#2563eb;border-radius:12px;padding:10px;font-weight:900}
-.card.done button{background:#ecfdf3;color:#15803d}
-.footerNote{text-align:center;color:#8792a3;font-size:12px;margin:20px}
-.screen{background:var(--card);border:1px solid var(--line);border-radius:28px;padding:22px;box-shadow:0 12px 35px #17203310}
-.stationHead{display:flex;align-items:center;gap:12px;margin-bottom:18px}.back{border:0;background:#eef2f7;border-radius:12px;padding:10px 14px;font-weight:900}.stationHead h2{margin:0;font-size:28px}.stationHead .tag{margin-left:auto;color:#64748b;font-size:12px;font-weight:900}
-.gameLayout{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:18px}
-.playArea{position:relative;background:#eaf2f8;border-radius:22px;overflow:hidden;min-height:500px}
-.side{border:1px solid var(--line);border-radius:20px;padding:20px;background:#fff}.side h4{margin:0 0 10px;color:#64748b;letter-spacing:1px}.rule{font-size:26px;font-weight:900;line-height:1.2;margin:12px 0 18px}.hint{font-size:13px;color:#667085;line-height:1.5}.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:18px 0}.stat{border:1px solid var(--line);border-radius:14px;padding:12px;text-align:center}.stat b{display:block;font-size:26px}.start{width:100%;border:0;border-radius:14px;background:var(--ink);color:#fff;padding:14px;font-weight:900}.start.running{background:#dbeafe;color:#1d4ed8}.live{font-weight:800;margin:12px 0;min-height:20px}.good{color:var(--good)}.warn{color:#b45309}.bad{color:var(--bad)}
-video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1);display:block}.camWrap{position:absolute;inset:0}.overlay{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
-.guideLine{position:absolute;inset:7%;border:2px dashed #fff9;border-radius:20px;pointer-events:none}.guideText{position:absolute;left:16px;top:16px;background:#172033cc;color:#fff;padding:9px 12px;border-radius:10px;font-weight:900}
-.result{position:absolute;inset:0;background:#172033eF;color:#fff;display:flex;align-items:center;justify-content:center;text-align:center;z-index:20}.resultBox{background:#fff;color:var(--ink);border-radius:26px;padding:30px;min-width:300px}.resultBox .big{font-size:70px;font-weight:900}.resultBox button{border:0;background:var(--ink);color:#fff;padding:12px 20px;border-radius:12px;font-weight:900;margin-top:12px}
-.target{position:absolute;width:72px;height:72px;border-radius:50%;display:grid;place-items:center;font-size:25px;font-weight:900;border:5px solid #fff;box-shadow:0 7px 20px #0004;user-select:none}
-.reaction{background:#22c55e}.numberTarget{background:#3b82f6;color:#fff}.mole{background:#8b5cf6}
-.target.fade{animation:pop .16s ease forwards}@keyframes pop{to{transform:scale(.1);opacity:0}}
-.moleBoard{position:absolute;inset:0;padding:35px;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:18px;background:#b7df9b}
-.hole{position:relative;border:0;border-radius:50%;background:#654321;box-shadow:inset 0 12px 0 #3b2414;overflow:hidden}
-.moleFace{position:absolute;left:50%;bottom:-12px;transform:translateX(-50%);width:105px;height:88px;background:#a66a3f;border-radius:50% 50% 38% 38%;display:grid;place-items:center;font-size:34px;transition:bottom .12s ease,transform .12s ease;z-index:2;box-shadow:0 -5px 12px #0003}
-.hole.active .moleFace{bottom:3px;transform:translateX(-50%) scale(1.03)}
-.jack{position:absolute;inset:0;display:grid;place-items:center}.jack .person{font-size:110px}.flash{position:absolute;inset:0;background:#22c55e33;opacity:0}
-.board{position:absolute;inset:0;background:#173f68;padding:26px;display:flex;flex-direction:column}.chalk{background:#e8edf0;border-radius:12px;flex:1;position:relative;overflow:hidden}.chalkGrid{position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent 0 48px,#c5cdd2 49px 50px),repeating-linear-gradient(90deg,transparent 0 48px,#c5cdd2 49px 50px);opacity:.45}.word{position:absolute;font-size:34px;font-weight:900;color:#23364d;user-select:none}.eraser{position:absolute;width:74px;height:74px;border-radius:16px;background:#fff;border:5px solid #dbe3ea;box-shadow:0 7px 15px #0003;display:none;pointer-events:none}.eraser.on{display:block}
-.calc{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;background:linear-gradient(135deg,#eff6ff,#f8fafc)}.equation{font-size:58px;font-weight:900}.answers{display:grid;grid-template-columns:repeat(2,180px);gap:12px}.answers button{border:0;background:#fff;border:2px solid #dbe3ee;border-radius:16px;padding:18px;font-size:25px;font-weight:900}.answers button:hover{border-color:#60a5fa;background:#eff6ff}
-.daily{background:var(--ink);color:#fff;border-radius:28px;padding:32px;text-align:center}.daily h2{font-size:32px;margin:0}.dailyScore{font-size:92px;font-weight:900;margin:12px}.breakdown{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:20px}.break{background:#ffffff12;border-radius:14px;padding:12px}.break b{display:block;font-size:25px}.resultBtns{display:flex;gap:10px;justify-content:center;margin-top:22px}.resultBtns button{border:0;border-radius:12px;padding:13px 20px;font-weight:900}.primary{background:#fff;color:var(--ink)}.secondary{background:#ffffff18;color:#fff}
-@media(max-width:900px){.grid{grid-template-columns:repeat(2,1fr)}.gameLayout{grid-template-columns:1fr}.side{order:-1}.heroScore{min-width:120px}.breakdown{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:560px){.app{padding:12px}.grid{grid-template-columns:1fr}.hero{padding:22px}.hero h1{font-size:29px}.heroScore strong{font-size:52px}.answers{grid-template-columns:repeat(2,1fr);width:90%}.answers button{width:100%}.equation{font-size:40px}}
+
+*{
+  box-sizing:border-box;
+}
+
+body{
+  margin:0;
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+  background:#f3f5f8;
+  color:#111827;
+}
+
+header{
+  background:#111827;
+  color:white;
+  padding:22px 28px;
+}
+
+header h1{
+  margin:0;
+  font-size:24px;
+}
+
+header p{
+  margin:6px 0 0;
+  color:#cbd5e1;
+  font-size:14px;
+}
+
+.container{
+  max-width:1800px;
+  margin:22px auto;
+  padding:0 18px;
+}
+
+.tabs{
+  display:flex;
+  gap:10px;
+  margin-bottom:16px;
+}
+
+.tab{
+  border:0;
+  background:white;
+  padding:12px 24px;
+  border-radius:12px;
+  font-size:16px;
+  font-weight:700;
+  cursor:pointer;
+  box-shadow:0 2px 8px rgba(0,0,0,.06);
+}
+
+.tab.active{
+  background:#111827;
+  color:white;
+}
+
+.layout{
+  display:grid;
+  grid-template-columns:minmax(0,2.4fr) minmax(360px,.8fr);
+  gap:18px;
+}
+
+.card{
+  background:white;
+  border-radius:18px;
+  padding:18px;
+  box-shadow:0 4px 18px rgba(0,0,0,.07);
+}
+
+/* =========================================================
+   영상
+========================================================= */
+
+.videoBox{
+  position:relative;
+  width:100%;
+  aspect-ratio:16/10;
+  background:#111827;
+  border-radius:14px;
+  overflow:hidden;
+}
+
+/*
+  영상 영역을 크게 사용
+*/
+.videoBox video,
+.videoBox canvas{
+  position:absolute;
+  left:0;
+  top:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+
+  /* 영상 자체는 확대하지 않음.
+     카메라 영역 자체를 크게 만든 상태에서
+     영상과 관절선의 좌우 방향만 동일하게 맞춤 */
+  transform:scaleX(-1);
+  transform-origin:center center;
+}
+
+/*
+  영상과 관절선이 같은 방향으로 움직이도록
+  둘 다 동일한 확대/거울 효과를 적용
+*/
+
+#recordedVideo{
+  display:none;
+}
+
+.badge{
+  position:absolute;
+  top:12px;
+  left:12px;
+  z-index:20;
+  background:#111827;
+  color:white;
+  padding:8px 12px;
+  border-radius:999px;
+  font-size:13px;
+  font-weight:700;
+}
+
+#recordingBadge{
+  display:none;
+  background:#dc2626;
+}
+
+#phaseBadge{
+  left:auto;
+  right:12px;
+  background:#2563eb;
+}
+
+.controls{
+  display:flex;
+  gap:10px;
+  margin-top:14px;
+}
+
+button{
+  -webkit-tap-highlight-color:transparent;
+  touch-action:manipulation;
+  border:0;
+  border-radius:11px;
+  padding:12px 18px;
+  font-size:15px;
+  font-weight:700;
+  cursor:pointer;
+}
+
+#startBtn{
+  position:relative;
+  z-index:50;
+  pointer-events:auto;
+  background:#2563eb;
+  color:white;
+  flex:1;
+}
+
+#stopBtn{
+  background:#e5e7eb;
+  color:#111827;
+  flex:1;
+}
+
+button:disabled{
+  opacity:.45;
+  cursor:not-allowed;
+}
+
+.status{
+  margin-top:12px;
+  padding:12px 14px;
+  border-radius:10px;
+  background:#f3f4f6;
+  font-size:14px;
+  line-height:1.5;
+}
+
+.seekWrap{
+  margin-top:12px;
+}
+
+.seekWrap input{
+  width:100%;
+}
+
+.tip{
+  margin-top:12px;
+  color:#64748b;
+  font-size:13px;
+  line-height:1.5;
+}
+
+/* =========================================================
+   결과
+========================================================= */
+
+.resultTitle{
+  font-size:18px;
+  font-weight:800;
+  margin-bottom:12px;
+}
+
+.scoreBox{
+  background:#111827;
+  color:white;
+  border-radius:16px;
+  padding:18px;
+  text-align:center;
+  margin-bottom:14px;
+}
+
+.scoreNumber{
+  font-size:42px;
+  font-weight:900;
+}
+
+.scoreLabel{
+  color:#cbd5e1;
+  font-size:13px;
+}
+
+.metrics{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+
+.metric{
+  background:#f8fafc;
+  border:1px solid #e5e7eb;
+  border-radius:13px;
+  padding:13px;
+}
+
+.metric .label{
+  font-size:12px;
+  color:#64748b;
+}
+
+.metric .value{
+  margin-top:4px;
+  font-size:21px;
+  font-weight:800;
+}
+
+.checks{
+  margin-top:14px;
+  display:flex;
+  flex-direction:column;
+  gap:9px;
+}
+
+.check{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  background:#f8fafc;
+  border-radius:11px;
+  padding:11px 13px;
+}
+
+.checkName{
+  font-size:14px;
+}
+
+.ok{
+  color:#16a34a;
+  font-weight:800;
+}
+
+.no{
+  color:#dc2626;
+  font-weight:800;
+}
+
+.sectionTitle{
+  font-size:16px;
+  font-weight:800;
+  margin:18px 0 8px;
+}
+
+.setup{
+  background:#eff6ff;
+  border:1px solid #bfdbfe;
+  border-radius:12px;
+  padding:13px;
+  font-size:13px;
+  line-height:1.6;
+}
+
+.hidden{
+  display:none !important;
+}
+
+@media(max-width:900px){
+
+  .container{
+    width:100%;
+    max-width:none;
+    margin:12px auto;
+    padding:0 10px;
+  }
+
+  header{
+    padding:18px 16px;
+  }
+
+  header h1{
+    font-size:20px;
+  }
+
+  .layout{
+    grid-template-columns:1fr;
+    gap:12px;
+  }
+
+  .card{
+    padding:10px;
+    border-radius:14px;
+  }
+
+  .videoBox{
+    width:100%;
+    aspect-ratio:3/4;
+    min-height:0;
+  }
+
+  .videoBox video,
+  .videoBox canvas{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+  }
+
+  .tabs{
+    margin-bottom:10px;
+  }
+
+  .tab{
+    flex:1;
+    padding:11px 8px;
+  }
+
+}
+
 </style>
 </head>
+
 <body>
-<div class="app">
-<header class="top"><div class="brand">우리학교 AI 체육관<small>AI MOTION TRAINING CENTER</small></div><div class="badge" id="todayBadge"></div></header>
 
-<section id="home">
-<div class="hero">
-<div>
-<div style="font-weight:900;color:#93c5fd">TODAY'S PE CHALLENGE</div>
-<h1>오늘의 체육 점수</h1>
-<p id="heroText">7개 게임에 도전하고 나만의 체육 점수를 만들어 보세요.</p>
-<div class="progress"><i id="bar"></i></div>
-</div>
-<div class="heroScore"><strong id="homeScore">0</strong><span>POINT</span></div>
+<header>
+
+  <h1>🏀 AI 농구 자세 코치</h1>
+
+  <p>
+    촬영하면서 관절 움직임을 분석하고 농구 자세를 확인합니다.
+  </p>
+
+</header>
+
+
+<div class="container">
+
+  <!-- 모드 -->
+  <div class="tabs">
+
+    <button
+      class="tab active"
+      id="shootTab"
+    >
+      🏀 슛 자세
+    </button>
+
+    <button
+      class="tab"
+      id="passTab"
+    >
+      🤲 패스 자세
+    </button>
+
+  </div>
+
+
+  <div class="layout">
+
+    <!-- =====================================================
+         왼쪽 영상
+    ====================================================== -->
+
+    <div class="card">
+
+      <div class="videoBox">
+
+        <video
+          id="liveVideo"
+          autoplay
+          muted
+          playsinline
+        ></video>
+
+        <video
+          id="recordedVideo"
+          muted
+          playsinline
+        ></video>
+
+        <canvas
+          id="overlay"
+        ></canvas>
+
+
+        <div
+          id="recordingBadge"
+          class="badge"
+        >
+          ● 촬영 중
+        </div>
+
+
+        <div
+          id="phaseBadge"
+          class="badge"
+        >
+          준비
+        </div>
+
+      </div>
+
+
+      <div class="controls">
+
+        <button
+          id="startBtn"
+          type="button"
+        >
+          촬영 시작
+        </button>
+
+        <button
+          id="stopBtn"
+          type="button"
+          disabled
+        >
+          촬영 종료
+        </button>
+
+      </div>
+
+
+      <div class="seekWrap">
+
+        <input
+          type="range"
+          id="seek"
+          min="0"
+          max="0"
+          value="0"
+          disabled
+        >
+
+      </div>
+
+
+      <div
+        class="status"
+        id="statusBox"
+      >
+        카메라를 준비하고 있습니다.
+      </div>
+
+
+      <div class="tip">
+
+        <b>슛:</b>
+        옆모습으로 촬영하고 머리부터 발끝까지 나오게 해주세요.
+
+        <br>
+
+        <b>패스:</b>
+        양손과 몸 전체가 화면에 나오게 해주세요.
+
+        <br>
+
+        촬영하는 동안 화면에
+        <b>관절 연결선과 팔꿈치·무릎 각도</b>가 표시됩니다.
+
+      </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         오른쪽 결과
+    ====================================================== -->
+
+    <div class="card">
+
+      <div class="resultTitle">
+        분석 결과
+      </div>
+
+
+      <div class="scoreBox">
+
+        <div
+          class="scoreNumber"
+          id="scoreNumber"
+        >
+          -
+        </div>
+
+        <div class="scoreLabel">
+          자세 점수
+        </div>
+
+      </div>
+
+
+      <!-- ================= 슛 ================= -->
+
+      <div id="shootResults">
+
+        <div style="display:flex;gap:8px;margin-bottom:12px;">
+          <button id="twoHandBtn" type="button" style="flex:1;background:#111827;color:white;">🏀 투핸드 슛</button>
+          <button id="oneHandBtn" type="button" style="flex:1;background:#e5e7eb;color:#111827;">🏀 원핸드 슛</button>
+        </div>
+
+        <div class="metrics">
+
+          <div class="metric">
+
+            <div class="label">
+              릴리즈 시점
+            </div>
+
+            <div
+              class="value"
+              id="releaseTime"
+            >
+              -
+            </div>
+
+          </div>
+
+
+          <div class="metric">
+
+            <div class="label">
+              팔꿈치 각도
+            </div>
+
+            <div
+              class="value"
+              id="shootElbow"
+            >
+              -
+            </div>
+
+          </div>
+
+
+          <div class="metric">
+
+            <div class="label">
+              무릎 각도
+            </div>
+
+            <div
+              class="value"
+              id="shootKnee"
+            >
+              -
+            </div>
+
+          </div>
+
+
+          <div class="metric">
+
+            <div class="label">
+              팔 방향 각도
+            </div>
+
+            <div
+              class="value"
+              id="releaseAngle"
+            >
+              -
+            </div>
+
+          </div>
+
+
+          <div class="metric">
+
+            <div class="label">
+              몸 상승량
+            </div>
+
+            <div
+              class="value"
+              id="riseAmount"
+            >
+              -
+            </div>
+
+          </div>
+
+
+          <div class="metric">
+
+            <div class="label">
+              팔로스루
+            </div>
+
+            <div
+              class="value"
+              id="followThrough"
+            >
+              -
+            </div>
+
+          </div>
+
+
+          <div class="metric">
+
+            <div class="label">
+              팔 사이 간격
+            </div>
+
+            <div
+              class="value"
+              id="followArmGap"
+            >
+              -
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div class="checks">
+
+          <div class="check">
+
+            <span class="checkName">
+              팔꿈치 펴기
+            </span>
+
+            <span id="shootCheck1">
+              -
+            </span>
+
+          </div>
+
+
+          <div class="check">
+
+            <span class="checkName">
+              하체 사용
+            </span>
+
+            <span id="shootCheck2">
+              -
+            </span>
+
+          </div>
+
+
+          <div class="check">
+
+            <span class="checkName">
+              팔로스루
+            </span>
+
+            <span id="shootCheck3">
+              -
+            </span>
+
+          </div>
+
+
+          <div class="check" id="twoHandCheckRow">
+
+            <span class="checkName">
+              투핸드 팔 벌어짐
+            </span>
+
+            <span id="shootCheck4">
+              -
+            </span>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- ================= 패스 ================= -->
+
+      <div
+        id="passResults"
+        class="hidden"
+      >
+
+        <div class="metrics">
+
+          <div class="metric">
+
+            <div class="label">
+              시작 팔꿈치-어깨 각도
+            </div>
+
+            <div
+              class="value"
+              id="passStartElbow"
+            >
+              -
+            </div>
+
+          </div>
+
+
+          <div class="metric">
+
+            <div class="label">
+              패스 후 팔꿈치
+            </div>
+
+            <div
+              class="value"
+              id="passFinishElbow"
+            >
+              -
+            </div>
+
+          </div>
+
+
+          <div class="metric">
+
+            <div class="label">
+              팔꿈치 변화
+            </div>
+
+            <div
+              class="value"
+              id="passElbowChange"
+            >
+              -
+            </div>
+
+          </div>
+
+
+          <div class="metric">
+
+            <div class="label">
+              던지기 직전 팔꿈치 각도
+            </div>
+
+            <div
+              class="value"
+              id="passLateBodyAngle"
+            >
+              -
+            </div>
+
+          </div>
+
+
+          <div class="metric">
+
+            <div class="label">
+              패스 후 손 간격
+            </div>
+
+            <div
+              class="value"
+              id="passHandDistance"
+            >
+              -
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div class="checks">
+
+          <div class="check">
+
+            <span class="checkName">
+              시작 팔꿈치 접기
+            </span>
+
+            <span id="passCheck1">
+              -
+            </span>
+
+          </div>
+
+
+          <div class="check">
+
+            <span class="checkName">
+              팔꿈치 벌어짐 억제
+            </span>
+
+            <span id="passCheckElbowFlare">
+              -
+            </span>
+
+          </div>
+
+
+          <div class="check">
+
+            <span class="checkName">
+              팔을 앞으로 뻗기
+            </span>
+
+            <span id="passCheck2">
+              -
+            </span>
+
+          </div>
+
+
+          <div class="check">
+
+            <span class="checkName">
+              패스 후 손 모양
+            </span>
+
+            <span id="passCheck3">
+              -
+            </span>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div class="sectionTitle">
+        촬영 방법
+      </div>
+
+
+      <div class="setup">
+
+        <b>슛 자세</b><br>
+
+        ① 투핸드 / 원핸드 선택<br>
+        ② 카메라를 몸 옆에 놓기<br>
+        ② 머리부터 발끝까지 나오게 하기<br>
+        ③ 공을 들고 평소처럼 슛하기<br>
+        ④ 촬영 종료 후 결과 확인<br><br>
+
+        <b>패스 자세</b><br>
+
+        ① 양손이 화면에 나오게 하기<br>
+        ② 처음에는 팔꿈치를 몸에 붙이고 팔을 접기<br>
+        ③ 가슴 앞에서 패스하기<br>
+        ④ 패스 후 손 모양 확인
+
+      </div>
+
+    </div>
+
+  </div>
+
 </div>
 
-<div class="grid" id="cards"></div>
-<div class="footerNote">게임을 끝내면 점수가 자동으로 저장됩니다. 7개를 모두 완료하면 오늘의 체육 점수를 확인할 수 있어요.</div>
-</section>
-
-<section id="station" class="hidden">
-<div class="screen">
-<div class="stationHead">
-<button class="back" id="back">← 목록</button>
-<h2 id="stationTitle"></h2>
-<span class="tag" id="stationTag"></span>
-</div>
-<div id="body"></div>
-</div>
-</section>
-
-<section id="daily" class="hidden"></section>
-</div>
 
 <script>
-const GAMES=[
-{id:"squat",name:"스쿼트",icon:"🏋️",desc:"정확한 자세로 스쿼트",time:45},
-{id:"jacks",name:"팔벌려뛰기",icon:"🤸",desc:"팔과 다리를 크게 벌려!",time:30},
-{id:"mole",name:"두더지잡기",icon:"🔨",desc:"나오는 두더지를 빠르게!",time:30},
-{id:"reaction",name:"반응속도 45초",icon:"⚡",desc:"숫자를 순서대로 터치!",time:45},
-{id:"hunter",name:"넘버헌터",icon:"🔢",desc:"숨어 있는 숫자를 찾아라!",time:30},
-{id:"erase",name:"칠판 지우기",icon:"🧽",desc:"칠판의 글씨를 빠르게 지워!",time:30},
-{id:"calc",name:"계산 눈치 게임",icon:"🧠",desc:"정답을 빠르게 골라!",time:30}
-];
 
-const scores=JSON.parse(localStorage.getItem("schoolGymScores7")||"{}");
-let timer=null,active=false,current=null,raf=null,stream=null,pose=null,gameData={};
+/* =========================================================
+   기본 변수
+========================================================= */
 
-const $=id=>document.getElementById(id);
+const liveVideo =
+  document.getElementById("liveVideo");
 
-function save(){
-localStorage.setItem("schoolGymScores7",JSON.stringify(scores));
-}
+const recordedVideo =
+  document.getElementById("recordedVideo");
 
-function average(){
-let a=GAMES.map(g=>scores[g.id]).filter(v=>typeof v==="number");
-return a.length?Math.round(a.reduce((x,y)=>x+y,0)/a.length):0;
-}
+const overlay =
+  document.getElementById("overlay");
 
-function renderHome(){
-$("homeScore").textContent=average();
+const ctx =
+  overlay.getContext("2d");
 
-const done=GAMES.filter(g=>typeof scores[g.id]==="number").length;
+const startBtn =
+  document.getElementById("startBtn");
 
-$("heroText").textContent=
-done===7
-?"🎉 7개 게임 완료! 오늘의 체육 점수를 확인해 보세요."
-:`${done}/7 게임 완료 · 원하는 게임부터 시작해 보세요.`;
+const stopBtn =
+  document.getElementById("stopBtn");
 
-$("bar").style.width=(done/7*100)+"%";
+const seek =
+  document.getElementById("seek");
 
-$("cards").innerHTML=GAMES.map((g,i)=>`
-<article class="card ${scores[g.id]!=null?"done":""}">
-<div>
-<div class="num">GAME 0${i+1}</div>
-<div class="icon">${g.icon}</div>
-<h3>${g.name}</h3>
-<p>${g.desc}</p>
-</div>
-<button onclick="openGame('${g.id}')">
-${scores[g.id]!=null?`완료 · ${scores[g.id]}점`:"게임 시작 →"}
-</button>
-</article>`).join("");
-}
+const statusBox =
+  document.getElementById("statusBox");
 
-function clearRun(){
-clearInterval(timer);
-timer=null;
-cancelAnimationFrame(raf);
-active=false;
+const recordingBadge =
+  document.getElementById("recordingBadge");
 
-if(stream){
-stream.getTracks().forEach(t=>t.stop());
-stream=null;
-}
-}
+const phaseBadge =
+  document.getElementById("phaseBadge");
 
-function backHome(){
-clearRun();
-$("station").classList.add("hidden");
-$("daily").classList.add("hidden");
-$("home").classList.remove("hidden");
-renderHome();
-}
+const shootTab =
+  document.getElementById("shootTab");
 
-$("back").onclick=backHome;
+const passTab =
+  document.getElementById("passTab");
 
-function openGame(id){
-clearRun();
+const shootResults =
+  document.getElementById("shootResults");
 
-current=GAMES.find(g=>g.id===id);
+const passResults =
+  document.getElementById("passResults");
 
-$("home").classList.add("hidden");
-$("daily").classList.add("hidden");
-$("station").classList.remove("hidden");
 
-$("stationTitle").textContent=current.icon+" "+current.name;
-$("stationTag").textContent="GAME 0"+(GAMES.indexOf(current)+1);
+let stream = null;
 
-({
-squat:renderSquat,
-jacks:renderJacks,
-mole:renderMole,
-reaction:renderReaction,
-hunter:renderHunter,
-erase:renderErase,
-calc:renderCalc
-}[id])();
-}
+let mediaRecorder = null;
 
-function side(rule,hint,stats,startId="startBtn"){
-return `
-<aside class="side">
-<h4>HOW TO PLAY</h4>
-<div class="rule">${rule}</div>
-<div class="hint">${hint}</div>
-<div class="stats">${stats}</div>
-<div id="msg" class="live">시작 버튼을 눌러 시작!</div>
-<button class="start" id="${startId}">시작하기</button>
-</aside>`;
-}
+let recordedChunks = [];
 
-function layout(play,sideHtml){
-$("body").innerHTML=`
-<div class="gameLayout">
-<div class="playArea">${play}</div>
-${sideHtml}
-</div>`;
-}
+let recordedURL = null;
 
-function endGame(score,extra=""){
-score=Math.max(0,Math.min(100,Math.round(score)));
-scores[current.id]=score;
-save();
-active=false;
-clearInterval(timer);
-$("msg").textContent="게임 종료!";
-showResult(score,extra);
-}
+let recording = false;
 
-function showResult(score,extra){
-const p=document.createElement("div");
-p.className="result";
+let recordingStart = 0;
 
-p.innerHTML=`
-<div class="resultBox">
-<div style="font-weight:900;color:#64748b">GAME RESULT</div>
-<div class="big">${score}</div>
-<b>POINT</b>
-<p>${extra||"좋아요! 다음 게임에 도전해 보세요."}</p>
-<button onclick="backHome()">목록으로 돌아가기</button>
-</div>`;
+let currentMode = "shoot";
+let shootType = "two";
 
-document.querySelector(".playArea").appendChild(p);
-}
+const twoHandBtn = document.getElementById("twoHandBtn");
+const oneHandBtn = document.getElementById("oneHandBtn");
 
-function countdown(sec,fn){
-let t=sec;
-active=true;
-fn(t);
+let currentPose = null;
 
-timer=setInterval(()=>{
-t--;
-fn(t);
+let currentHands = null;
 
-if(t<=0){
-clearInterval(timer);
-timer=null;
-active=false;
-}
-},1000);
-}
+let samples = [];
 
-/* camera */
-async function camera(video){
-try{
-stream=await navigator.mediaDevices.getUserMedia({
-video:{width:1280,height:720},
-audio:false
-});
+let poseBusy = false;
 
-video.srcObject=stream;
-return true;
-}
-catch(e){
-$("msg").textContent="카메라 권한을 허용해 주세요.";
-return false;
-}
-}
+let handsBusy = false;
 
-function loadPose(){
-if(pose)return Promise.resolve(pose);
+let lastAnalysisTime = 0;
 
-return new Promise(resolve=>{
-if(window.Pose){
-pose=new Pose({
-locateFile:f=>`https://cdn.jsdelivr.net/npm/@mediapipe/pose/${f}`
-});
+let previousElbow = null;
 
-pose.setOptions({
-modelComplexity:1,
-smoothLandmarks:true,
-minDetectionConfidence:.55,
-minTrackingConfidence:.55
-});
+let releaseDetected = false;
 
-resolve(pose);
-return;
-}
 
-const s=document.createElement("script");
+/* =========================================================
+   MediaPipe Pose
+========================================================= */
 
-s.src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js";
-
-s.onload=()=>{
-pose=new Pose({
-locateFile:f=>`https://cdn.jsdelivr.net/npm/@mediapipe/pose/${f}`
-});
-
-pose.setOptions({
-modelComplexity:1,
-smoothLandmarks:true,
-minDetectionConfidence:.55,
-minTrackingConfidence:.55
-});
-
-resolve(pose);
-};
-
-document.head.appendChild(s);
-});
-}
-
-async function startPose(video,handler){
-const p=await loadPose();
-
-await camera(video);
-
-const loop=async()=>{
-if(!active)return;
+let pose = null;
 
 try{
-await p.send({image:video});
-}catch(e){}
 
-raf=requestAnimationFrame(loop);
-};
+  if(typeof Pose === "function"){
 
-p.onResults(handler);
-loop();
+    pose = new Pose({
+
+      locateFile:file => {
+        return `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`;
+      }
+
+    });
+
+  }
+
+}catch(error){
+
+  console.error("Pose 초기화 오류:", error);
+
 }
 
-/* squat */
-function renderSquat(){
 
-layout(`
-<div class="camWrap">
-<video id="video" autoplay playsinline></video>
-<canvas id="canvas" class="overlay"></canvas>
-<div class="guideLine"></div>
-<div class="guideText">전신이 화면에 보이게 서세요</div>
-</div>`,
+if(pose){
 
-side(
-"무릎을 굽혀<br>깊게 앉았다 일어나!",
-"발이 모두 보이도록 서고, 허리를 너무 숙이지 마세요.",
-`<div class="stat">횟수<b id="count">0</b></div>
-<div class="stat">시간<b id="time">45</b></div>`
-));
+  pose.setOptions({
 
-$("startBtn").onclick=startSquat;
+    modelComplexity:1,
+    smoothLandmarks:true,
+    enableSegmentation:false,
+    smoothSegmentation:false,
+    minDetectionConfidence:.5,
+    minTrackingConfidence:.5
+
+  });
+
 }
 
-async function startSquat(){
 
-if(active)return;
+if(pose){
 
-$("startBtn").textContent="진행 중…";
-$("startBtn").classList.add("running");
-$("count").textContent=0;
+pose.onResults(
+  results => {
 
-gameData={phase:"up",count:0};
+    if(
+      results &&
+      results.poseLandmarks
+    ){
 
-const video=$("video");
+      currentPose =
+        results.poseLandmarks;
 
-await startPose(video,r=>{
-if(!active||!r.poseLandmarks)return;
+      /*
+        실시간 관절 표시
+      */
 
-const p=r.poseLandmarks;
+      drawPose(
+        currentPose,
+        currentHands
+      );
 
-const a1=ang(p[23],p[25],p[27]);
-const a2=ang(p[24],p[26],p[28]);
-const a=(a1+a2)/2;
 
-if(a<110)gameData.phase="down";
+      /*
+        촬영 중이면 데이터 저장
+      */
 
-if(a>155&&gameData.phase==="down"){
-gameData.count++;
-gameData.phase="up";
-$("count").textContent=gameData.count;
-}
+      if(recording){
 
-$("msg").textContent=
-a<110
-?"⬇️ 더 내려가세요!"
-:"⬆️ 좋아요!";
-});
+        const elapsed =
+          (
+            performance.now() -
+            recordingStart
+          ) / 1000;
 
-countdown(45,t=>{
-$("time").textContent=t;
 
-if(t<=0){
-endGame(
-Math.min(100,gameData.count*4),
-`${gameData.count}회 성공`
-);
-}
-});
-}
+        const metrics =
+          getBodyMetrics(
+            currentPose
+          );
 
-function ang(a,b,c){
-if(!a||!b||!c)return 180;
 
-const ab={
-x:a.x-b.x,
-y:a.y-b.y
-};
+        if(metrics){
 
-const cb={
-x:c.x-b.x,
-y:c.y-b.y
-};
+          samples.push({
 
-const dot=ab.x*cb.x+ab.y*cb.y;
-const l=Math.hypot(ab.x,ab.y)*Math.hypot(cb.x,cb.y);
+            time:elapsed,
 
-return Math.acos(
-Math.max(-1,Math.min(1,dot/l))
-)*180/Math.PI;
-}
+            landmarks:
+              cloneLandmarks(
+                currentPose
+              ),
 
-/* jumping jacks */
-function renderJacks(){
-
-layout(`
-<div class="camWrap">
-<video id="video" autoplay playsinline></video>
-<canvas id="canvas" class="overlay"></canvas>
-<div class="guideLine"></div>
-<div class="guideText">팔·다리를 크게 벌렸다 모으세요</div>
-</div>`,
-
-side(
-"힘차게 뛰기!",
-"전신이 화면에 들어오게 서서 팔과 다리를 동시에 벌렸다 모아 주세요.",
-`<div class="stat">성공<b id="count">0</b></div>
-<div class="stat">시간<b id="time">30</b></div>`
-));
-
-$("startBtn").onclick=startJacks;
-}
+            metrics: metrics,
 
-async function startJacks(){
+            elbow:
+              metrics.elbow,
 
-if(active)return;
+            knee:
+              metrics.knee,
 
-$("startBtn").textContent="진행 중…";
+            releaseAngle:
+              metrics.releaseAngle,
 
-gameData={
-open:false,
-count:0
-};
+            rise:
+              metrics.rise
 
-await startPose($("video"),r=>{
+          });
 
-if(!active||!r.poseLandmarks)return;
 
-const p=r.poseLandmarks;
+          if(
+            currentMode === "shoot"
+          ){
 
-const lw=p[15],
-rw=p[16],
-la=p[27],
-ra=p[28],
-ls=p[11],
-rs=p[12];
+            updateShootPhase(
+              metrics
+            );
 
-if(!lw||!rw||!la||!ra)return;
+          }
 
-const shoulder=Math.abs(ls.x-rs.x);
-const ankle=Math.abs(la.x-ra.x);
+        }
 
-const arms=
-lw.y<ls.y-.08 &&
-rw.y<rs.y-.08;
+      }
 
-const legs=
-ankle>shoulder*1.35;
+    }
 
-if(arms&&legs&&!gameData.open){
-gameData.open=true;
-$("msg").textContent="🟢 벌리기 성공!";
-}
-
-if(!arms&&!legs&&gameData.open){
-gameData.open=false;
-gameData.count++;
-$("count").textContent=gameData.count;
-$("msg").textContent="좋아요!";
-}
-
-});
-
-countdown(30,t=>{
-$("time").textContent=t;
-
-if(t<=0){
-endGame(
-Math.min(100,gameData.count*5),
-`${gameData.count}회 성공`
-);
-}
-});
-}
-
-/* mole */
-function renderMole(){
-
-const holes=Array.from(
-{length:9},
-(_,i)=>`
-<button class="hole" data-i="${i}">
-<span class="moleFace">😎</span>
-</button>`
-).join("");
-
-layout(
-`<div class="moleBoard" id="moles">${holes}</div>`,
-
-side(
-"두더지가 나오면<br>빠르게 눌러!",
-"30초 동안 나타나는 두더지를 최대한 많이 잡으세요.",
-`<div class="stat">성공<b id="count">0</b></div>
-<div class="stat">시간<b id="time">30</b></div>`
-));
-
-document.querySelectorAll(".hole").forEach(h=>
-h.onclick=()=>{
-if(active&&h.classList.contains("active")){
-h.classList.remove("active");
-gameData.hit++;
-$("count").textContent=gameData.hit;
-}
-});
-
-$("startBtn").onclick=startMole;
-}
-
-function startMole(){
-
-if(active)return;
-
-$("startBtn").textContent="진행 중…";
-
-gameData={hit:0};
-
-let last=-1;
-
-const pop=()=>{
-
-if(!active)return;
-
-document.querySelectorAll(".hole")
-.forEach(h=>h.classList.remove("active"));
-
-let i=Math.floor(Math.random()*9);
-
-while(i===last)
-i=Math.floor(Math.random()*9);
-
-last=i;
-
-document
-.querySelector(`.hole[data-i="${i}"]`)
-.classList.add("active");
-
-setTimeout(()=>{
-const h=document.querySelector(`.hole[data-i="${i}"]`);
-if(h)h.classList.remove("active");
-},700);
-
-setTimeout(pop,850);
-};
-
-active=true;
-pop();
-
-countdown(30,t=>{
-$("time").textContent=t;
-
-if(t<=0){
-endGame(
-Math.min(100,gameData.hit*5),
-`${gameData.hit}마리 잡기 성공`
-);
-}
-});
-}
-
-/* reaction */
-function renderReaction(){
-
-layout(
-`<div id="reactionArea" style="position:absolute;inset:0;background:#eef4f8">
-<div class="guideText">숫자를 1 → 2 → 3… 순서대로 눌러!</div>
-<div id="reactionTarget" class="target reaction">
-<span>1</span>
-</div>
-</div>`,
-
-side(
-"숫자를 순서대로<br>빠르게 터치!",
-"45초 동안 나타나는 숫자를 순서대로 클릭하세요. 맞히면 다음 숫자가 새 위치에 나타납니다.",
-`<div class="stat">성공<b id="count">0</b></div>
-<div class="stat">시간<b id="time">45</b></div>`
-));
-
-$("startBtn").onclick=startReaction;
-}
-
-function placeReaction(){
-
-const t=$("reactionTarget");
-const a=$("reactionArea");
-
-t.style.left=(8+Math.random()*76)+"%";
-t.style.top=(20+Math.random()*65)+"%";
-
-t.querySelector("span").textContent=gameData.next;
-}
-
-function startReaction(){
-
-if(active)return;
-
-$("startBtn").textContent="진행 중…";
-
-gameData={
-next:1,
-hit:0
-};
-
-placeReaction();
-
-$("reactionTarget").onclick=()=>{
-
-if(!active)return;
-
-gameData.hit++;
-gameData.next++;
-
-$("count").textContent=gameData.hit;
-
-const t=$("reactionTarget");
-
-t.classList.add("fade");
-
-setTimeout(()=>{
-t.classList.remove("fade");
-placeReaction();
-},130);
-};
-
-countdown(45,t=>{
-$("time").textContent=t;
-
-if(t<=0){
-endGame(
-Math.min(100,gameData.hit*4),
-`${gameData.hit}개 성공`
-);
-}
-});
-}
-
-/* number hunter */
-function renderHunter(){
-
-layout(
-`<div id="hunterArea" style="position:absolute;inset:0;background:#f1f5f9">
-<div class="guideText">1부터 순서대로 모두 찾아라!</div>
-<div id="hunterTargets"></div>
-</div>`,
-
-side(
-"숫자를 찾아<br>순서대로 터치!",
-"30초 안에 1부터 20까지 최대한 많이 찾아보세요.",
-`<div class="stat">성공<b id="count">0</b></div>
-<div class="stat">시간<b id="time">30</b></div>`
-));
-
-$("startBtn").onclick=startHunter;
-}
-
-function startHunter(){
-
-if(active)return;
-
-$("startBtn").textContent="진행 중…";
-
-gameData={
-next:1,
-hit:0
-};
-
-spawnHunter();
-
-countdown(30,t=>{
-$("time").textContent=t;
-
-if(t<=0){
-endGame(
-Math.min(100,gameData.hit*5),
-`${gameData.hit}개 찾기 성공`
-);
-}
-});
-}
-
-function spawnHunter(){
-
-const box=$("hunterTargets");
-
-box.innerHTML="";
-
-const nums=[];
-
-for(let i=0;i<12;i++)
-nums.push(gameData.next+i);
-
-nums.sort(()=>Math.random()-.5);
-
-nums.forEach(n=>{
-
-const b=document.createElement("button");
-
-b.className="target numberTarget";
-
-b.style.left=(6+Math.random()*84)+"%";
-b.style.top=(16+Math.random()*72)+"%";
-
-b.textContent=n;
-
-b.onclick=()=>{
-
-if(!active)return;
-
-if(n===gameData.next){
-
-gameData.hit++;
-gameData.next++;
-
-$("count").textContent=gameData.hit;
-
-b.classList.add("fade");
-
-setTimeout(()=>b.remove(),100);
-
-if(gameData.next>20){
-
-endGame(
-100,
-"20개 모두 성공!"
+  }
 );
 
-return;
 }
 
-}else{
 
-$("msg").textContent="❌ 순서를 확인하세요.";
+/* =========================================================
+   MediaPipe Hands
+========================================================= */
 
-setTimeout(()=>
-$("msg").textContent="",
-500
+let hands = null;
+
+try{
+
+  if(typeof Hands === "function"){
+
+    hands = new Hands({
+      locateFile:file => {
+        return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
+      }
+    });
+
+  }
+
+}catch(error){
+
+  console.error("Hands 초기화 오류:", error);
+
+}
+
+
+if(hands){
+
+  hands.setOptions({
+    maxNumHands:2,
+    modelComplexity:0,
+    minDetectionConfidence:.5,
+    minTrackingConfidence:.5
+  });
+
+}
+
+
+if(hands){
+
+hands.onResults(
+  results => {
+
+    currentHands =
+      results.multiHandLandmarks || [];
+
+    if(currentPose){
+
+      drawPose(
+        currentPose,
+        currentHands
+      );
+
+    }
+
+  }
 );
-}
-};
 
-box.appendChild(b);
-});
 }
 
-/* blackboard */
-function renderErase(){
 
-const words=[
-"체육",
-"달리기",
-"협동",
-"건강",
-"도전",
-"스포츠",
-"성공",
-"힘",
-"균형",
-"집중",
-"민첩",
-"스쿼트",
-"점프",
-"패스",
-"팀워크"
+/* =========================================================
+   카메라
+========================================================= */
+
+async function startCamera(){
+
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+
+    statusBox.textContent = "이 브라우저에서는 카메라 기능을 사용할 수 없습니다. Chrome 또는 Edge에서 HTTPS로 열어주세요.";
+    return false;
+
+  }
+
+  if(stream){
+
+    liveVideo.srcObject =
+      stream;
+
+    try{
+      await liveVideo.play();
+    }catch(e){}
+
+    return true;
+
+  }
+
+
+  try{
+
+    stream =
+      await navigator.mediaDevices.getUserMedia({
+
+        video:{
+          width:{
+            ideal:1280
+          },
+
+          height:{
+            ideal:720
+          },
+
+          facingMode:"user"
+        },
+
+        audio:true
+
+      });
+
+
+    liveVideo.srcObject =
+      stream;
+
+
+    await liveVideo.play();
+
+
+    resizeCanvas();
+
+
+    statusBox.textContent =
+      "카메라 준비 완료. 촬영할 준비가 되었습니다.";
+
+
+    return true;
+
+  }catch(error){
+
+    console.error(
+      "카메라 오류:",
+      error
+    );
+
+
+    statusBox.textContent =
+      "카메라 권한을 허용해주세요.";
+
+
+    return false;
+
+  }
+
+}
+
+
+/* =========================================================
+   Canvas
+========================================================= */
+
+function resizeCanvas(){
+
+  if(
+    liveVideo.videoWidth <= 0
+  ){
+    return;
+  }
+
+
+  overlay.width =
+    liveVideo.videoWidth;
+
+  overlay.height =
+    liveVideo.videoHeight;
+
+}
+
+
+liveVideo.addEventListener(
+  "loadedmetadata",
+  resizeCanvas
+);
+
+
+/* =========================================================
+   각도
+========================================================= */
+
+function angle(a,b,c){
+
+  const ab = {
+
+    x:a.x-b.x,
+
+    y:a.y-b.y
+
+  };
+
+
+  const cb = {
+
+    x:c.x-b.x,
+
+    y:c.y-b.y
+
+  };
+
+
+  const n =
+    Math.hypot(
+      ab.x,
+      ab.y
+    ) *
+    Math.hypot(
+      cb.x,
+      cb.y
+    );
+
+
+  if(!n){
+    return 180;
+  }
+
+
+  const cosine =
+    (
+      ab.x*cb.x +
+      ab.y*cb.y
+    ) / n;
+
+
+  return Math.acos(
+
+    Math.max(
+      -1,
+      Math.min(
+        1,
+        cosine
+      )
+    )
+
+  ) * 180 / Math.PI;
+
+}
+
+
+/* =========================================================
+   거리
+========================================================= */
+
+function distance(a,b){
+
+  return Math.hypot(
+    a.x-b.x,
+    a.y-b.y
+  );
+
+}
+
+
+/* =========================================================
+   좌우 측정
+========================================================= */
+
+function getSide(lm){
+
+  let left = 0;
+
+  let right = 0;
+
+
+  [
+    11,
+    13,
+    15,
+    23,
+    25,
+    27
+  ].forEach(
+    id => {
+
+      left +=
+        lm[id]?.visibility || 0;
+
+    }
+  );
+
+
+  [
+    12,
+    14,
+    16,
+    24,
+    26,
+    28
+  ].forEach(
+    id => {
+
+      right +=
+        lm[id]?.visibility || 0;
+
+    }
+  );
+
+
+  return left >= right
+    ? "left"
+    : "right";
+
+}
+
+
+/* =========================================================
+   신체 분석
+========================================================= */
+
+function getBodyMetrics(lm){
+
+  if(
+    !lm ||
+    lm.length < 29
+  ){
+
+    return null;
+
+  }
+
+
+  const side =
+    getSide(lm);
+
+
+  let shoulder;
+  let elbowPoint;
+  let wrist;
+  let hip;
+  let kneePoint;
+  let ankle;
+
+
+  if(side === "left"){
+
+    shoulder =
+      lm[11];
+
+    elbowPoint =
+      lm[13];
+
+    wrist =
+      lm[15];
+
+    hip =
+      lm[23];
+
+    kneePoint =
+      lm[25];
+
+    ankle =
+      lm[27];
+
+  }else{
+
+    shoulder =
+      lm[12];
+
+    elbowPoint =
+      lm[14];
+
+    wrist =
+      lm[16];
+
+    hip =
+      lm[24];
+
+    kneePoint =
+      lm[26];
+
+    ankle =
+      lm[28];
+
+  }
+
+
+  if(
+    !shoulder ||
+    !elbowPoint ||
+    !wrist ||
+    !hip ||
+    !kneePoint ||
+    !ankle
+  ){
+
+    return null;
+
+  }
+
+
+  const elbow =
+    angle(
+      shoulder,
+      elbowPoint,
+      wrist
+    );
+
+
+  const knee =
+    angle(
+      hip,
+      kneePoint,
+      ankle
+    );
+
+
+  let dx =
+    wrist.x -
+    elbowPoint.x;
+
+
+  let dy =
+    elbowPoint.y -
+    wrist.y;
+
+
+  let releaseAngle =
+    Math.atan2(
+      dy,
+      dx
+    ) * 180 / Math.PI;
+
+
+  if(releaseAngle < 0){
+
+    releaseAngle += 180;
+
+  }
+
+
+  let rise = 0;
+
+
+  if(samples.length > 0){
+
+    const firstHip =
+      samples[0].landmarks[
+        side === "left"
+          ? 23
+          : 24
+      ];
+
+
+    if(firstHip){
+
+      rise =
+        (
+          firstHip.y -
+          hip.y
+        ) * 100;
+
+    }
+
+  }
+
+
+  return {
+
+    elbow,
+
+    knee,
+
+    releaseAngle,
+
+    rise,
+
+    shoulder,
+
+    elbowPoint,
+
+    wrist,
+
+    hip,
+
+    kneePoint,
+
+    ankle
+
+  };
+
+}
+
+
+/* =========================================================
+   관절 연결
+========================================================= */
+
+const connections = [
+
+  [11,12],
+
+  [11,13],
+  [13,15],
+
+  [12,14],
+  [14,16],
+
+  [11,23],
+  [12,24],
+
+  [23,24],
+
+  [23,25],
+  [25,27],
+
+  [24,26],
+  [26,28]
+
 ];
 
-layout(
-`<div class="board">
-<div class="chalk" id="chalk">
-<div class="chalkGrid"></div>
 
-${words.map((w,i)=>
-`<span class="word" style="left:${8+Math.random()*78}%;top:${8+Math.random()*78}%">${w}</span>`
-).join("")}
+/* =========================================================
+   관절 그리기
+========================================================= */
 
-<div class="eraser" id="eraser"></div>
-</div>
-</div>`,
-
-side(
-"칠판 글씨를<br>빠르게 지워!",
-"마우스/터치로 글씨를 눌러 지우세요. 카메라가 없는 기기에서도 바로 플레이할 수 있습니다.",
-`<div class="stat">지운 수<b id="count">0</b></div>
-<div class="stat">시간<b id="time">30</b></div>`
-));
-
-$("startBtn").onclick=startErase;
-}
-
-function startErase(){
-
-if(active)return;
-
-$("startBtn").textContent="진행 중…";
-
-gameData={hit:0};
-
-const chalk=$("chalk");
-
-chalk.querySelectorAll(".word").forEach(w=>
-
-w.onclick=()=>{
-
-if(
-active &&
-!w.classList.contains("gone")
+function drawPose(
+  lm,
+  handLm
 ){
 
-w.classList.add("gone");
-w.style.opacity=0;
+  ctx.clearRect(
+    0,
+    0,
+    overlay.width,
+    overlay.height
+  );
 
-gameData.hit++;
 
-$("count").textContent=gameData.hit;
+  if(!lm){
+    return;
+  }
 
-$("msg").textContent="🧽 지우기 성공!";
+
+  /*
+    관절 연결선
+  */
+
+  ctx.strokeStyle =
+    "#00ff66";
+
+  ctx.lineWidth =
+    7;
+
+
+  connections.forEach(
+    pair => {
+
+      const a =
+        lm[pair[0]];
+
+      const b =
+        lm[pair[1]];
+
+
+      if(!a || !b){
+        return;
+      }
+
+
+      if(
+        (a.visibility || 0) < .2 ||
+        (b.visibility || 0) < .2
+      ){
+
+        return;
+
+      }
+
+
+      ctx.beginPath();
+
+
+      ctx.moveTo(
+        a.x * overlay.width,
+        a.y * overlay.height
+      );
+
+
+      ctx.lineTo(
+        b.x * overlay.width,
+        b.y * overlay.height
+      );
+
+
+      ctx.stroke();
+
+    }
+  );
+
+
+  /*
+    관절 점
+  */
+
+  const important = [
+
+    11,12,
+    13,14,
+    15,16,
+    23,24,
+    25,26,
+    27,28
+
+  ];
+
+
+  important.forEach(
+    index => {
+
+      const p =
+        lm[index];
+
+
+      if(
+        !p ||
+        (p.visibility || 0) < .2
+      ){
+
+        return;
+
+      }
+
+
+      ctx.beginPath();
+
+
+      ctx.arc(
+
+        p.x * overlay.width,
+
+        p.y * overlay.height,
+
+        10,
+
+        0,
+
+        Math.PI * 2
+
+      );
+
+
+      ctx.fillStyle =
+        "#ffffff";
+
+      ctx.fill();
+
+
+      ctx.lineWidth =
+        4;
+
+      ctx.strokeStyle =
+        "#00ff66";
+
+      ctx.stroke();
+
+    }
+  );
+
+
+  /*
+    각도 표시
+
+    ★ 슛:
+    어깨-팔꿈치-손목 각도
+
+    ★ 패스:
+    먼 어깨 → 가까운 어깨 → 팔꿈치 각도
+    (가까운 어깨가 꼭짓점인 빨간 각도)
+  */
+
+  const metrics =
+    getBodyMetrics(lm);
+
+
+  if(metrics){
+
+    if(currentMode === "pass"){
+
+      const passMetrics =
+        getPassFrameMetrics(lm);
+
+      if(passMetrics){
+
+        drawBodyAngleArc(
+          passMetrics.nearShoulder,
+          passMetrics.nearElbow,
+          passMetrics.farShoulder
+        );
+
+        drawAngleLabel(
+          `${Math.round(passMetrics.elbowBodyAngle)}°`,
+          passMetrics.nearElbow.x * overlay.width,
+          passMetrics.nearElbow.y * overlay.height
+        );
+
+      }
+
+    }else{
+
+      drawAngleLabel(
+        `${Math.round(metrics.elbow)}°`,
+        metrics.elbowPoint.x * overlay.width,
+        metrics.elbowPoint.y * overlay.height
+      );
+
+    }
+
+
+    if(currentMode === "shoot") {
+      drawAngleLabel(
+        `${Math.round(metrics.knee)}°`,
+        metrics.kneePoint.x * overlay.width,
+        metrics.kneePoint.y * overlay.height
+      );
+    }
+
+  }
+
+
+  /*
+    패스일 때 손도 표시
+  */
+
+  if(
+    currentMode === "pass" &&
+    handLm &&
+    handLm.length
+  ){
+
+    drawHands(
+      handLm
+    );
+
+  }
+
 }
-});
 
-countdown(30,t=>{
 
-$("time").textContent=t;
+/* =========================================================
+   패스 팔꿈치-양어깨 각도 표시
+========================================================= */
 
-if(t<=0){
+function drawBodyAngleArc(
+  nearShoulder,
+  elbow,
+  farShoulder
+){
 
-endGame(
-Math.min(100,gameData.hit*7),
-`${gameData.hit}개 지우기 성공`
+  if(!nearShoulder || !elbow || !farShoulder){
+    return;
+  }
+
+  // ★ 빨간 각도의 꼭짓점은 팔꿈치가 아니라 '가까운 어깨'다.
+  // 먼 어깨 → 가까운 어깨 → 팔꿈치
+  const sx = nearShoulder.x * overlay.width;
+  const sy = nearShoulder.y * overlay.height;
+
+  const a1 = Math.atan2(
+    farShoulder.y - nearShoulder.y,
+    farShoulder.x - nearShoulder.x
+  );
+
+  const a2 = Math.atan2(
+    elbow.y - nearShoulder.y,
+    elbow.x - nearShoulder.x
+  );
+
+  let diff = a2 - a1;
+
+  while(diff > Math.PI) diff -= Math.PI * 2;
+  while(diff < -Math.PI) diff += Math.PI * 2;
+
+  ctx.save();
+  ctx.beginPath();
+
+  ctx.arc(
+    sx,
+    sy,
+    48,
+    a1,
+    a1 + diff,
+    diff < 0
+  );
+
+  ctx.strokeStyle = '#ff3030';
+  ctx.lineWidth = 5;
+  ctx.stroke();
+
+  ctx.restore();
+}
+
+
+/* =========================================================
+   패스 결과
+========================================================= */
+
+function pointLineDistance(p, a, b){
+
+  const abx = b.x - a.x;
+  const aby = b.y - a.y;
+  const apx = p.x - a.x;
+  const apy = p.y - a.y;
+
+  const len2 = abx*abx + aby*aby;
+
+  if(len2 < 0.000001){
+    return Math.hypot(apx, apy);
+  }
+
+  const t = Math.max(0, Math.min(1, (apx*abx + apy*aby) / len2));
+  const qx = a.x + t*abx;
+  const qy = a.y + t*aby;
+
+  return Math.hypot(p.x-qx, p.y-qy);
+
+}
+
+function getPassFrameMetrics(lm){
+
+  if(!lm || lm.length < 29){
+    return null;
+  }
+
+  const ls = lm[11], le = lm[13], lw = lm[15];
+  const rs = lm[12], re = lm[14], rw = lm[16];
+  const lh = lm[23], rh = lm[24];
+
+  if(!ls || !le || !lw || !rs || !re || !rw || !lh || !rh){
+    return null;
+  }
+
+  // 패스 시작 자세에서는 '카메라에 가까운 어깨-팔꿈치' 쪽을 사용한다.
+  // MediaPipe의 z값은 카메라에 가까울수록 작아지는 특성이 있으므로
+  // visibility보다 z를 우선한다. z가 없거나 거의 같으면 visibility를 보조로 사용한다.
+  const leftZ = Number.isFinite(ls.z) ? ls.z : 0;
+  const rightZ = Number.isFinite(rs.z) ? rs.z : 0;
+  const leftShoulderVis = ls.visibility || 0;
+  const rightShoulderVis = rs.visibility || 0;
+
+  let nearIsLeft;
+  if(Math.abs(leftZ - rightZ) > 0.015){
+    nearIsLeft = leftZ < rightZ;
+  }else{
+    nearIsLeft = leftShoulderVis >= rightShoulderVis;
+  }
+
+  const nearShoulder = nearIsLeft ? ls : rs;
+  const farShoulder  = nearIsLeft ? rs : ls;
+  const nearElbow    = nearIsLeft ? le : re;
+  const nearWrist    = nearIsLeft ? lw : rw;
+
+  // ★ 사용자가 사진에서 표시한 빨간 각도
+  // 꼭짓점은 팔꿈치가 아니라 '가까운 어깨'이다.
+  // 먼 어깨 → 가까운 어깨 → 팔꿈치
+  // 팔을 몸 옆으로 자연스럽게 내리면 약 90°가 나오고,
+  // 팔꿈치를 몸통에서 앞으로/바깥으로 벌릴수록 각도가 커진다.
+  const elbowBodyAngle = angle(
+    farShoulder,
+    nearShoulder,
+    nearElbow
+  );
+
+  const leftElbow = angle(ls, le, lw);
+  const rightElbow = angle(rs, re, rw);
+
+  const shoulderWidth = Math.max(0.05, distance(ls, rs));
+  const handDistance = distance(lw, rw) / shoulderWidth;
+
+  return {
+    elbow: nearIsLeft ? leftElbow : rightElbow,
+    avgElbow: (leftElbow + rightElbow) / 2,
+    elbowBodyAngle,
+    nearShoulder,
+    nearElbow,
+    farShoulder,
+    handDistance
+  };
+
+}
+
+function median(arr){
+
+  if(!arr.length){
+    return 0;
+  }
+
+  const sorted = [...arr].sort((a,b) => a-b);
+  const mid = Math.floor(sorted.length / 2);
+
+  return sorted.length % 2
+    ? sorted[mid]
+    : (sorted[mid-1] + sorted[mid]) / 2;
+
+}
+
+
+function passAngleScore(deg){
+
+  // 사용자가 지정한 기준:
+  // 90~120° = 좋은 시작 자세
+  // 180°에 가까울수록 잘못된 자세
+  if(!Number.isFinite(deg)) return 0;
+
+  if(deg >= 90 && deg <= 120){
+    // 105°를 가장 좋은 중앙값으로 두고 90~120° 안에서는 55~60점
+    return 60 - Math.abs(deg - 105) * 0.25;
+  }
+
+  if(deg < 90){
+    // 90°보다 작아질수록 완만하게 감점
+    return Math.max(0, 55 - (90 - deg) * 1.1);
+  }
+
+  // 120°보다 커질수록, 특히 180°에 가까워질수록 강하게 감점
+  return Math.max(0, 60 - (deg - 120) * 1.5);
+
+}
+
+function finishElbowScore(deg){
+
+  if(!Number.isFinite(deg)) return 0;
+  if(deg >= 160) return 25;
+  if(deg >= 145) return 22 + Math.min(3, (deg - 145) * 0.2);
+  if(deg >= 120) return 12 + (deg - 120) * 0.4;
+  return Math.max(0, (deg - 80) * 0.15);
+
+}
+
+function handDistanceScore(ratio){
+
+  if(!Number.isFinite(ratio)) return 0;
+
+  // 두 손이 너무 벌어지지 않는 것이 목표. 0.65~0.95 정도를 안정 구간으로 본다.
+  if(ratio <= 0.95) return 15;
+  if(ratio <= 1.20) return 15 - (ratio - 0.95) * 25;
+  return Math.max(0, 8.75 - (ratio - 1.20) * 20);
+
+}
+
+function analyzePassResult(){
+
+  if(!samples || !samples.length){
+    setText('scoreNumber', '0');
+    setText('passStartElbow', '측정 실패');
+    setText('passFinishElbow', '측정 실패');
+    setText('passElbowChange', '-');
+    setText('passLateBodyAngle', '-');
+    setText('passHandDistance', '-');
+    return;
+  }
+
+  // 촬영 초반 30% = 패스 준비 자세
+  const earlyCount = Math.max(1, Math.min(30, Math.floor(samples.length * 0.30) || 1));
+  const early = samples.slice(0, earlyCount);
+
+  // ★ 핵심: 패스 직전 구간도 별도로 본다.
+  // 아이들이 처음에는 팔꿈치를 붙였다가 던지기 직전에 팔꿈치를 벌리는 경우를 잡기 위해
+  // 마지막 32%의 '빨간 각도(먼 어깨-가까운 어깨-팔꿈치)' 최대값을 사용한다.
+  const lateStart = Math.min(samples.length - 1, Math.floor(samples.length * 0.40));
+  const late = samples.slice(lateStart);
+
+  // 패스 동작은 촬영 끝부분에만 일어난다고 가정하지 않는다.
+  // 준비 자세 이후 실제 동작 구간 전체에서 빨간 각도의 최고값을 찾는다.
+  // 따라서 '처음엔 붙였다가 던지기 직전에 확 벌리는' 순간도 놓치지 않는다.
+
+  const earlyMetrics = early
+    .map(s => getPassFrameMetrics(s.landmarks))
+    .filter(m => m && Number.isFinite(m.elbowBodyAngle));
+
+  const lateMetrics = late
+    .map(s => getPassFrameMetrics(s.landmarks))
+    .filter(m => m && Number.isFinite(m.elbowBodyAngle));
+
+  if(!earlyMetrics.length){
+    setText('scoreNumber', '0');
+    setText('passStartElbow', '측정 실패');
+    setText('passFinishElbow', '측정 실패');
+    setText('passElbowChange', '-');
+    setText('passLateBodyAngle', '측정 실패');
+    setText('passHandDistance', '-');
+    return;
+  }
+
+  const startBodyAngle = median(
+    earlyMetrics.map(m => m.elbowBodyAngle)
+  );
+
+  const finishSource = lateMetrics.length ? lateMetrics : earlyMetrics;
+
+  const finishElbow = median(
+    finishSource.map(m => m.elbow).filter(Number.isFinite)
+  );
+
+  const finishHandDistance = median(
+    finishSource.map(m => m.handDistance).filter(Number.isFinite)
+  );
+
+  const startElbow = median(
+    earlyMetrics.map(m => m.elbow).filter(Number.isFinite)
+  );
+
+  // 준비 자세 이후 빨간 각도의 최대값을 사용한다.
+  // 단 한 순간이라도 크게 벌어지면 '팔꿈치 벌어짐'으로 판정한다.
+  const postStartAngles = samples
+    .slice(earlyCount)
+    .map(s => getPassFrameMetrics(s.landmarks))
+    .filter(m => m && Number.isFinite(m.elbowBodyAngle))
+    .map(m => m.elbowBodyAngle);
+
+  const lateBodyAngle = postStartAngles.length
+    ? Math.max(...postStartAngles)
+    : startBodyAngle;
+
+  const elbowChange = Number.isFinite(finishElbow) && Number.isFinite(startElbow)
+    ? finishElbow - startElbow
+    : 0;
+
+  // 시작 자세: 90~120°가 정상 범위
+  const startScore = passAngleScore(startBodyAngle);
+
+  // 패스 직전 팔꿈치 벌어짐: 120° 이하를 유지하면 만점.
+  // 120~150°는 단계적으로 감점, 150° 이상은 큰 감점.
+  let flareScore = 25;
+  if(lateBodyAngle <= 120){
+    flareScore = 25;
+  }else if(lateBodyAngle <= 135){
+    flareScore = 25 - (lateBodyAngle - 120) * (10 / 15);
+  }else if(lateBodyAngle <= 150){
+    flareScore = 15 - (lateBodyAngle - 135);
+  }else{
+    flareScore = 0;
+  }
+
+  const finishScore = finishElbowScore(finishElbow);
+  const handScore = handDistanceScore(finishHandDistance);
+
+  let score = startScore + flareScore + finishScore * 0.6 + handScore * 0.6;
+
+  // 팔꿈치를 던지기 직전에 벌린 경우는 단순 가산점 문제가 아니라
+  // 패스 자세의 핵심 오류이므로 총점을 강제로 제한한다.
+  if(lateBodyAngle > 150){
+    score = Math.min(score, 55);
+  }else if(lateBodyAngle > 135){
+    score = Math.min(score, 70);
+  }
+
+  score = Math.round(Math.max(0, Math.min(100, score)));
+
+  const startOK = startBodyAngle >= 90 && startBodyAngle <= 120;
+  const flareOK = lateBodyAngle <= 125;
+  const finishOK = finishElbow >= 145;
+  const handOK = finishHandDistance <= 0.95;
+
+  setText('scoreNumber', score);
+  setText('passStartElbow', `${Math.round(startBodyAngle)}°`);
+  setText('passFinishElbow', `${Math.round(finishElbow)}°`);
+  setText('passElbowChange', `${Math.round(elbowChange)}°`);
+  setText('passLateBodyAngle', `${Math.round(lateBodyAngle)}°`);
+  setText('passHandDistance', `${Math.round(finishHandDistance * 100)}%`);
+
+  setCheck('passCheck1', startOK);
+  setCheck('passCheck2', finishOK);
+  setCheck('passCheck3', handOK);
+  setCheck('passCheckElbowFlare', flareOK);
+
+  const check1 = document.getElementById('passCheck1');
+  if(check1){
+    if(startOK){
+      check1.textContent = `✓ ${Math.round(startBodyAngle)}° 좋음`;
+      check1.className = 'ok';
+    }else{
+      check1.textContent = startBodyAngle > 120
+        ? `✕ ${Math.round(startBodyAngle)}° — 시작할 때 팔꿈치가 벌어짐`
+        : `✕ ${Math.round(startBodyAngle)}° — 90° 이상 권장`;
+      check1.className = 'no';
+    }
+  }
+
+  const flareCheck = document.getElementById('passCheckElbowFlare');
+  if(flareCheck){
+    if(flareOK){
+      flareCheck.textContent = `✓ ${Math.round(lateBodyAngle)}° 유지`;
+      flareCheck.className = 'ok';
+    }else{
+      flareCheck.textContent = `✕ ${Math.round(lateBodyAngle)}° — 던지기 직전 팔꿈치 벌어짐`;
+      flareCheck.className = 'no';
+    }
+  }
+
+}
+
+
+/* =========================================================
+   최종 결과
+========================================================= */
+
+function showFinalResults(){
+
+  if(
+    currentMode === "shoot"
+  ){
+
+    analyzeShootResult();
+
+  }else{
+
+    analyzePassResult();
+
+  }
+
+}
+
+
+/* =========================================================
+   평균
+========================================================= */
+
+function average(arr){
+
+  if(
+    !arr.length
+  ){
+
+    return 0;
+
+  }
+
+
+  return arr.reduce(
+    (a,b) => a+b,
+    0
+  ) / arr.length;
+
+}
+
+
+/* =========================================================
+   텍스트
+========================================================= */
+
+function setText(
+  id,
+  value
+){
+
+  const el =
+    document.getElementById(id);
+
+
+  if(el){
+
+    el.textContent =
+      value;
+
+  }
+
+}
+
+
+/* =========================================================
+   체크
+========================================================= */
+
+function setCheck(
+  id,
+  ok
+){
+
+  const el =
+    document.getElementById(id);
+
+
+  if(!el){
+    return;
+  }
+
+
+  if(ok){
+
+    el.textContent =
+      "✓ 좋음";
+
+    el.className =
+      "ok";
+
+  }else{
+
+    el.textContent =
+      "△ 확인";
+
+    el.className =
+      "no";
+
+  }
+
+}
+
+
+/* =========================================================
+   결과 초기화
+========================================================= */
+
+function resetResults(){
+
+  setText(
+    "scoreNumber",
+    "-"
+  );
+
+
+  [
+
+    "releaseTime",
+    "shootElbow",
+    "shootKnee",
+    "releaseAngle",
+    "riseAmount",
+    "followThrough",
+    "followArmGap",
+
+    "passStartElbow",
+    "passFinishElbow",
+    "passElbowChange",
+    "passLateBodyAngle",
+    "passHandDistance"
+
+  ].forEach(
+    id => {
+
+      setText(
+        id,
+        "-"
+      );
+
+    }
+  );
+
+
+  [
+
+    "shootCheck1",
+    "shootCheck2",
+    "shootCheck3",
+    "shootCheck4",
+
+    "passCheck1",
+    "passCheckElbowFlare",
+    "passCheck2",
+    "passCheck3"
+
+  ].forEach(
+    id => {
+
+      const el =
+        document.getElementById(id);
+
+
+      if(el){
+
+        el.textContent =
+          "-";
+
+        el.className =
+          "";
+
+      }
+
+    }
+  );
+
+}
+
+
+/* =========================================================
+   슛 탭
+========================================================= */
+
+shootTab.addEventListener(
+  "click",
+  () => {
+
+    if(recording){
+      return;
+    }
+
+
+    currentMode =
+      "shoot";
+
+
+    shootTab.classList.add(
+      "active"
+    );
+
+
+    passTab.classList.remove(
+      "active"
+    );
+
+
+    shootResults.classList.remove(
+      "hidden"
+    );
+
+
+    passResults.classList.add(
+      "hidden"
+    );
+
+
+    phaseBadge.textContent =
+      "준비";
+
+
+    statusBox.textContent =
+      "슛 자세입니다. 옆모습으로 촬영하세요.";
+
+
+    resetResults();
+
+  }
 );
 
-}
-});
-}
 
-/* calculation */
-function renderCalc(){
+/* =========================================================
+   슛 방식 선택
+========================================================= */
 
-layout(
-`<div class="calc">
-<div class="guideText" style="top:14px;left:14px">
-정답을 빠르게 선택!
-</div>
-
-<div class="equation" id="eq">
-3 + 4 = ?
-</div>
-
-<div class="answers" id="answers"></div>
-</div>`,
-
-side(
-"계산하고<br>정답을 골라!",
-"30초 동안 나오는 계산 문제의 정답을 빠르게 눌러 보세요.",
-`<div class="stat">정답<b id="count">0</b></div>
-<div class="stat">시간<b id="time">30</b></div>`
-));
-
-$("startBtn").onclick=startCalc;
+function updateShootTypeButtons(){
+  if(twoHandBtn && oneHandBtn){
+    if(shootType === "two"){
+      twoHandBtn.style.background = "#111827";
+      twoHandBtn.style.color = "white";
+      oneHandBtn.style.background = "#e5e7eb";
+      oneHandBtn.style.color = "#111827";
+    }else{
+      oneHandBtn.style.background = "#111827";
+      oneHandBtn.style.color = "white";
+      twoHandBtn.style.background = "#e5e7eb";
+      twoHandBtn.style.color = "#111827";
+    }
+  }
 }
 
-function newCalc(){
-
-let a=1+Math.floor(Math.random()*9);
-let b=1+Math.floor(Math.random()*9);
-
-let op=Math.random()<.5?"+":"-";
-
-if(op==="-"&&b>a)
-[a,b]=[b,a];
-
-let ans=op==="+"?a+b:a-b;
-
-gameData.answer=ans;
-
-$("eq").textContent=`${a} ${op} ${b} = ?`;
-
-let opts=[ans];
-
-while(opts.length<4){
-
-let x=ans+Math.floor(Math.random()*9)-4;
-
-if(x>=0&&!opts.includes(x))
-opts.push(x);
+if(twoHandBtn){
+  twoHandBtn.addEventListener("click", () => {
+    if(recording) return;
+    shootType = "two";
+    const row=document.getElementById('twoHandCheckRow');
+    if(row) row.style.display='flex';
+    updateShootTypeButtons();
+    resetResults();
+    statusBox.textContent = "투핸드 슛입니다. 팔로스루에서 양팔이 바깥으로 벌어지지 않는지도 확인합니다.";
+  });
 }
 
-opts.sort(()=>Math.random()-.5);
+if(oneHandBtn){
+  oneHandBtn.addEventListener("click", () => {
+    if(recording) return;
+    shootType = "one";
+    const row=document.getElementById('twoHandCheckRow');
+    if(row) row.style.display='none';
+    updateShootTypeButtons();
+    resetResults();
+    statusBox.textContent = "원핸드 슛입니다. 팔로스루 팔 벌어짐 평가는 제외합니다.";
+  });
+}
 
-$("answers").innerHTML=opts
-.map(x=>`<button>${x}</button>`)
-.join("");
+updateShootTypeButtons();
 
-document
-.querySelectorAll("#answers button")
-.forEach(b=>
 
-b.onclick=()=>{
+/* =========================================================
+   패스 탭
+========================================================= */
 
-if(!active)return;
+passTab.addEventListener(
+  "click",
+  () => {
 
-if(Number(b.textContent)===gameData.answer){
+    if(recording){
+      return;
+    }
 
-gameData.hit++;
 
-$("count").textContent=gameData.hit;
+    currentMode =
+      "pass";
 
-$("msg").textContent="⭕ 정답!";
 
-newCalc();
+    passTab.classList.add(
+      "active"
+    );
 
-}else{
 
-$("msg").textContent="❌ 다시 계산!";
+    shootTab.classList.remove(
+      "active"
+    );
 
-setTimeout(()=>
-$("msg").textContent="",
-450
+
+    passResults.classList.remove(
+      "hidden"
+    );
+
+
+    shootResults.classList.add(
+      "hidden"
+    );
+
+
+    phaseBadge.textContent =
+      "준비";
+
+
+    statusBox.textContent =
+      "패스 자세입니다. 양손이 잘 보이게 촬영하세요.";
+
+
+    resetResults();
+
+  }
 );
 
-}
-});
-}
 
-function startCalc(){
 
-if(active)return;
+/* =========================================================
+   실시간 분석 / 촬영
+========================================================= */
 
-$("startBtn").textContent="진행 중…";
-
-gameData={hit:0};
-
-newCalc();
-
-countdown(30,t=>{
-
-$("time").textContent=t;
-
-if(t<=0){
-
-endGame(
-Math.min(100,gameData.hit*8),
-`${gameData.hit}문제 정답`
-);
-
-}
-});
+function cloneLandmarks(lm){
+  return (lm || []).map(p => ({
+    x:p.x, y:p.y, z:p.z,
+    visibility:p.visibility
+  }));
 }
 
-/* all complete */
-function showDaily(){
-
-clearRun();
-
-$("home").classList.add("hidden");
-$("station").classList.add("hidden");
-$("daily").classList.remove("hidden");
-
-const avg=average();
-
-$("daily").innerHTML=`
-<div class="daily">
-
-<div style="color:#93c5fd;font-weight:900">
-TODAY'S PE SCORE
-</div>
-
-<h2>오늘의 체육 점수</h2>
-
-<div class="dailyScore">${avg}</div>
-
-<div>POINT</div>
-
-<div class="breakdown">
-
-${GAMES.map(g=>
-`<div class="break">
-<span>${g.icon} ${g.name}</span>
-<b>${scores[g.id]??0}</b>
-</div>`
-).join("")}
-
-</div>
-
-<div class="resultBtns">
-
-<button class="primary" onclick="backHome()">
-게임 목록으로
-</button>
-
-<button class="secondary" onclick="resetScores()">
-오늘 기록 초기화
-</button>
-
-</div>
-
-</div>`;
+function drawAngleLabel(text,x,y,color="#ffffff"){
+  ctx.save();
+  ctx.font = "bold 22px Arial, sans-serif";
+  const pad = 7;
+  const w = ctx.measureText(text).width + pad*2;
+  const h = 32;
+  ctx.fillStyle = "rgba(17,24,39,.82)";
+  ctx.fillRect(x-w/2, y-h-10, w, h);
+  ctx.fillStyle = color;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(text, x, y-h/2-10);
+  ctx.restore();
 }
 
-function resetScores(){
-
-if(confirm("오늘의 게임 기록을 초기화할까요?")){
-
-GAMES.forEach(g=>
-delete scores[g.id]
-);
-
-save();
-backHome();
+function drawHands(handLm){
+  if(!handLm || !handLm.length) return;
+  const handConnections = [
+    [0,1],[1,2],[2,3],[3,4],
+    [0,5],[5,6],[6,7],[7,8],
+    [0,9],[9,10],[10,11],[11,12],
+    [0,13],[13,14],[14,15],[15,16],
+    [0,17],[17,18],[18,19],[19,20],
+    [5,9],[9,13],[13,17]
+  ];
+  ctx.save();
+  handLm.forEach(hand=>{
+    if(!hand) return;
+    ctx.strokeStyle = "#ffd400";
+    ctx.lineWidth = 4;
+    handConnections.forEach(([a,b])=>{
+      const p=hand[a], q=hand[b];
+      if(!p || !q) return;
+      ctx.beginPath();
+      ctx.moveTo(p.x*overlay.width,p.y*overlay.height);
+      ctx.lineTo(q.x*overlay.width,q.y*overlay.height);
+      ctx.stroke();
+    });
+    hand.forEach(p=>{
+      if(!p) return;
+      ctx.beginPath();
+      ctx.arc(p.x*overlay.width,p.y*overlay.height,5,0,Math.PI*2);
+      ctx.fillStyle="#fff";
+      ctx.fill();
+      ctx.strokeStyle="#ffd400";
+      ctx.lineWidth=2;
+      ctx.stroke();
+    });
+  });
+  ctx.restore();
 }
+
+function updateShootPhase(metrics){
+  if(!metrics) return;
+  const elbow = metrics.elbow;
+  if(!releaseDetected && elbow >= 155){
+    releaseDetected = true;
+    phaseBadge.textContent = "릴리즈";
+    if(samples.length){
+      samples[samples.length-1].release = true;
+    }
+  }else if(!releaseDetected){
+    phaseBadge.textContent = elbow < 120 ? "준비" : "동작 중";
+  }
 }
 
-window.openGame=openGame;
+function analyzeShootResult(){
+  if(!samples.length){
+    setText('scoreNumber','0');
+    setText('shootElbow','측정 실패');
+    setText('shootKnee','측정 실패');
+    return;
+  }
 
-renderHome();
+  const valid=samples.filter(s=>s.metrics);
+  if(!valid.length){
+    setText('scoreNumber','0');
+    return;
+  }
+
+  const elbows=valid.map(s=>s.metrics.elbow).filter(Number.isFinite);
+  const knees=valid.map(s=>s.metrics.knee).filter(Number.isFinite);
+  const angles=valid.map(s=>s.metrics.releaseAngle).filter(Number.isFinite);
+  const rises=valid.map(s=>s.metrics.rise).filter(Number.isFinite);
+
+  const elbowAvg=median(elbows);
+  const kneeAvg=median(knees);
+  const releaseAvg=median(angles);
+  const rise=Math.max(...rises,0);
+
+  const releaseSample=valid.find(s=>s.release) || valid.reduce((a,b)=>
+    (a.metrics.elbow > b.metrics.elbow ? a : b)
+  );
+  const releaseTime=releaseSample?.time ?? 0;
+
+  const first=valid.slice(0,Math.max(1,Math.floor(valid.length*.25)));
+  const last=valid.slice(Math.floor(valid.length*.75));
+  const firstElbow=median(first.map(s=>s.metrics.elbow).filter(Number.isFinite));
+  const lastElbow=median(last.map(s=>s.metrics.elbow).filter(Number.isFinite));
+  const followThrough=lastElbow >= 145;
+
+  const elbowOK=elbowAvg>=135;
+  const kneeOK=kneeAvg>=135;
+  const riseOK=rise>=2;
+  const followOK=followThrough;
+
+  let score=0;
+  score += elbowOK ? 30 : Math.max(0,30-Math.abs(150-elbowAvg)*.5);
+  score += kneeOK ? 20 : Math.max(0,20-Math.abs(150-kneeAvg)*.25);
+  score += followOK ? 25 : Math.max(0,25-(145-lastElbow)*.5);
+  score += riseOK ? 15 : Math.min(15,Math.max(0,rise*3));
+  score += Math.min(10,Math.max(0,10-Math.abs(45-releaseAvg)*.15));
+
+  let armGap='-';
+  const gapSamples=valid.map(s=>{
+    const lm=s.landmarks;
+    if(!lm?.[15]||!lm?.[16]||!lm?.[11]||!lm?.[12]) return null;
+    const sw=Math.max(.05,distance(lm[11],lm[12]));
+    return distance(lm[15],lm[16])/sw;
+  }).filter(Number.isFinite);
+  if(gapSamples.length) armGap=`${Math.round(median(gapSamples)*100)}%`;
+
+  if(shootType==='two'){
+    const twoOK=gapSamples.length ? median(gapSamples)<=1.25 : true;
+    score += twoOK ? 0 : -8;
+    setCheck('shootCheck4',twoOK);
+    setText('followArmGap',armGap);
+  }else{
+    const row=document.getElementById('twoHandCheckRow');
+    if(row) row.style.display='none';
+    setText('followArmGap','제외');
+  }
+
+  score=Math.round(Math.max(0,Math.min(100,score)));
+
+  setText('scoreNumber',score);
+  setText('releaseTime',`${releaseTime.toFixed(1)}초`);
+  setText('shootElbow',`${Math.round(elbowAvg)}°`);
+  setText('shootKnee',`${Math.round(kneeAvg)}°`);
+  setText('releaseAngle',`${Math.round(releaseAvg)}°`);
+  setText('riseAmount',`${rise.toFixed(1)}%`);
+  setText('followThrough',followThrough?'좋음':'확인 필요');
+
+  setCheck('shootCheck1',elbowOK);
+  setCheck('shootCheck2',kneeOK || riseOK);
+  setCheck('shootCheck3',followOK);
+}
+
+async function analysisLoop(){
+  if(liveVideo.readyState >= 2){
+    resizeCanvas();
+    if(pose && !poseBusy){
+      poseBusy=true;
+      try{
+        await pose.send({image:liveVideo});
+      }catch(e){
+        console.error('Pose 분석 오류:',e);
+      }finally{
+        poseBusy=false;
+      }
+    }
+    if(hands && !handsBusy){
+      handsBusy=true;
+      try{
+        await hands.send({image:liveVideo});
+      }catch(e){
+        console.error('Hands 분석 오류:',e);
+      }finally{
+        handsBusy=false;
+      }
+    }
+  }
+  requestAnimationFrame(analysisLoop);
+}
+
+function resetRecordingState(){
+  recording=false;
+  recordingBadge.style.display='none';
+  stopBtn.disabled=true;
+  startBtn.disabled=false;
+  startBtn.textContent='촬영 시작';
+  phaseBadge.textContent='준비';
+}
+
+async function startRecording(){
+  if(recording) return;
+
+  if(!stream){
+    const ok=await startCamera();
+    if(!ok) return;
+  }
+
+  if(!pose){
+    statusBox.textContent='AI 자세 분석을 불러오지 못했습니다. 인터넷 연결을 확인해주세요.';
+    return;
+  }
+
+  samples=[];
+  releaseDetected=false;
+  previousElbow=null;
+  lastAnalysisTime=0;
+  resetResults();
+
+  if(currentMode==='shoot'){
+    phaseBadge.textContent='준비';
+    statusBox.textContent=shootType==='two'
+      ? '투핸드 슛을 평소처럼 해주세요.'
+      : '원핸드 슛을 평소처럼 해주세요.';
+  }else{
+    phaseBadge.textContent='준비';
+    statusBox.textContent='팔꿈치를 몸에 붙이고 시작한 뒤 가슴 앞에서 패스하세요.';
+  }
+
+  recording=true;
+  recordingStart=performance.now();
+  recordingBadge.style.display='block';
+  startBtn.disabled=true;
+  stopBtn.disabled=false;
+  startBtn.textContent='촬영 중…';
+
+  recordedChunks=[];
+  if(window.MediaRecorder && stream){
+    try{
+      const mime = MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
+        ? 'video/webm;codecs=vp9'
+        : 'video/webm';
+      mediaRecorder=new MediaRecorder(stream,{mimeType:mime});
+      mediaRecorder.ondataavailable=e=>{
+        if(e.data && e.data.size) recordedChunks.push(e.data);
+      };
+      mediaRecorder.start(250);
+    }catch(e){
+      mediaRecorder=null;
+    }
+  }
+}
+
+function stopRecording(){
+  if(!recording) return;
+
+  recording=false;
+  recordingBadge.style.display='none';
+  stopBtn.disabled=true;
+  startBtn.disabled=false;
+  startBtn.textContent='다시 촬영';
+  phaseBadge.textContent='분석 완료';
+
+  if(mediaRecorder && mediaRecorder.state!=='inactive'){
+    try{ mediaRecorder.stop(); }catch(e){}
+  }
+
+  if(samples.length){
+    showFinalResults();
+    statusBox.textContent='촬영이 끝났습니다. 오른쪽에서 자세 결과를 확인하세요.';
+  }else{
+    statusBox.textContent='촬영 데이터가 없습니다. 카메라에 몸 전체가 보이는지 확인해주세요.';
+  }
+}
+
+startBtn.addEventListener('click', startRecording);
+stopBtn.addEventListener('click', stopRecording);
+
+/* =========================================================
+   시작
+========================================================= */
+
+startBtn.dataset.mode =
+  "camera";
+
+
+startBtn.textContent =
+  "촬영 시작";
+
+
+stopBtn.disabled =
+  true;
+
+
+/*
+  시작
+*/
+
+(async function(){
+
+  try{
+
+    const ok = await startCamera();
+
+    if(ok){
+      statusBox.textContent = "카메라 준비 완료. 촬영 시작을 눌러주세요.";
+    }
+
+  }catch(error){
+
+    console.error(error);
+    statusBox.textContent = "카메라를 준비하지 못했습니다. 브라우저의 카메라 권한을 확인해주세요.";
+
+  }
+
+  requestAnimationFrame(analysisLoop);
+
+})();
+
 </script>
+
 </body>
 </html>
