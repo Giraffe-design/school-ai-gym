@@ -938,6 +938,27 @@ const startBtn =
 const stopBtn =
   document.getElementById("stopBtn");
 
+/* =========================================================
+   시작 버튼 - 최우선 연결
+   다른 AI/카메라 코드에 오류가 있어도 버튼 클릭 자체는 먼저 받는다.
+========================================================= */
+startBtn.style.pointerEvents = "auto";
+startBtn.style.position = "relative";
+startBtn.style.zIndex = "9999";
+
+startBtn.onclick = function(){
+  startBtn.disabled = true;
+  startBtn.textContent = "카메라 준비 중…";
+  Promise.resolve()
+    .then(() => startRecording())
+    .catch(error => {
+      console.error("촬영 시작 오류:", error);
+      startBtn.disabled = false;
+      startBtn.textContent = "촬영 시작";
+      if(statusBox) statusBox.textContent = "촬영 시작 중 오류가 발생했습니다. 다시 눌러주세요.";
+    });
+};
+
 const seek =
   document.getElementById("seek");
 
@@ -2807,7 +2828,6 @@ function stopRecording(){
   }
 }
 
-startBtn.addEventListener('click', startRecording);
 stopBtn.addEventListener('click', stopRecording);
 window.startRecording = startRecording;
 window.stopRecording = stopRecording;
