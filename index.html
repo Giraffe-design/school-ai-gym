@@ -489,6 +489,90 @@ button:disabled{
       </div>
 
 
+
+      <script>
+      /* 버튼/카메라 직접 연결: 아래 AI 코드와 독립 */
+      (function(){
+        const b = document.getElementById("startBtn");
+        const stop = document.getElementById("stopBtn");
+        const video = document.getElementById("liveVideo");
+
+        window.__cameraStream = null;
+        window.__cameraStarting = false;
+
+        if(b){
+          b.onclick = async function(){
+            if(window.__cameraStarting) return;
+
+            const status = document.getElementById("statusBox");
+            b.disabled = true;
+            b.textContent = "카메라 연결 중…";
+            if(status) status.textContent = "카메라 연결을 시작했습니다.";
+
+            try{
+              if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+                throw new Error("브라우저에서 카메라 기능을 사용할 수 없습니다. Chrome/Edge의 HTTPS 페이지에서 실행해주세요.");
+              }
+
+              window.__cameraStarting = true;
+
+              if(!window.__cameraStream){
+                window.__cameraStream = await navigator.mediaDevices.getUserMedia({
+                  video:{
+                    width:{ideal:1280},
+                    height:{ideal:720},
+                    facingMode:"user"
+                  },
+                  audio:false
+                });
+              }
+
+              video.srcObject = window.__cameraStream;
+              await video.play();
+
+              if(stop) stop.disabled = false;
+              b.textContent = "촬영 중";
+              if(status) status.textContent = "카메라 연결 완료! 촬영 중입니다.";
+
+              /* 기존 AI 분석 함수가 준비되어 있으면 연결 */
+              if(typeof window.startRecording === "function"){
+                try{
+                  await window.startRecording();
+                }catch(err){
+                  console.error(err);
+                }
+              }
+
+            }catch(err){
+              console.error("카메라 오류:", err);
+              b.disabled = false;
+              b.textContent = "촬영 시작";
+              if(status) status.textContent = "카메라를 켤 수 없습니다: " + (err.message || err.name || "알 수 없는 오류");
+            }finally{
+              window.__cameraStarting = false;
+            }
+          };
+        }
+
+        if(stop){
+          stop.onclick = function(){
+            if(window.__cameraStream){
+              window.__cameraStream.getTracks().forEach(t => t.stop());
+              window.__cameraStream = null;
+            }
+            if(video) video.srcObject = null;
+            stop.disabled = true;
+            if(b){
+              b.disabled = false;
+              b.textContent = "촬영 시작";
+            }
+            const status = document.getElementById("statusBox");
+            if(status) status.textContent = "촬영이 종료되었습니다. 다시 시작할 수 있습니다.";
+          };
+        }
+      })();
+      </script>
+
       <div class="tip">
 
         <b>슛:</b>
@@ -2732,6 +2816,12 @@ function resetRecordingState(){
 
 async function startRecording(){
   if(recording) return;
+
+  if(window.__cameraStream){
+    stream = window.__cameraStream;
+    liveVideo.srcObject = stream;
+    try{ await liveVideo.play(); }catch(e){}
+  }
 
   startBtn.disabled=true;
   startBtn.textContent='카메라 준비 중…';
